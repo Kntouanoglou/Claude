@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Env
+.env
+
+# SQLite data
+backend/data/*.db
+backend/data/*.db-journal
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+
+# Editors / OS
+.DS_Store
+.vscode/
+.idea/
+
+# HF / sentence-transformers cache (if ever created locally in-repo)
+.cache/
