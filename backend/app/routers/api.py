@@ -1,3 +1,4 @@
+import anthropic
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
@@ -37,6 +38,21 @@ async def import_material(
         # a config problem, not a bad request, so surface it as 503 with a clear
         # message rather than a generic 500.
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except anthropic.APIStatusError as exc:
+        # The Anthropic API itself rejected the request (bad API key, no credit
+        # balance, rate limit, overload, etc.). exc.message is the whole raw
+        # "Error code: 400 - {...}" string; pull out the clean nested message
+        # the API actually sent, falling back to the raw string if the body
+        # isn't shaped as expected.
+        error_body = exc.body.get("error") if isinstance(exc.body, dict) else None
+        clean_message = error_body.get("message") if isinstance(error_body, dict) else None
+        raise HTTPException(
+            status_code=502, detail=f"Anthropic API error: {clean_message or exc.message}"
+        ) from exc
+    except anthropic.APIConnectionError as exc:
+        raise HTTPException(
+            status_code=502, detail="Could not reach the Anthropic API — check your network connection."
+        ) from exc
 
 
 @router.get("/courses", response_model=list[schemas.CourseListItemOut])
