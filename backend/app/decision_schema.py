@@ -9,7 +9,12 @@ They will drift independently as we tune prompts vs. as we tune the UI.
 
 from typing import Literal, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
+
+# Minimum length (after stripping whitespace) for a concept's synthesized content.
+# Not a quality bar, just a floor that catches empty/placeholder output outright —
+# real synthesized prose is expected to run to many hundreds of characters.
+_MIN_CONCEPT_CONTENT_CHARS = 40
 
 
 class StrictModel(BaseModel):
@@ -23,6 +28,28 @@ class ConceptProposal(StrictModel):
     title: str
     content: str  # synthesized/organized learning content, not a copy-paste of the source
     order: int  # relative ordering hint only — the app renumbers sequentially on write
+
+    @field_validator("title")
+    @classmethod
+    def title_must_be_non_trivial(cls, v: str) -> str:
+        if len(v.strip()) < 3 or v.strip().lower() in {"placeholder", "todo", "tbd", "n/a"}:
+            raise ValueError(f"concept title {v!r} looks like a placeholder, not a real concept title")
+        return v
+
+    @field_validator("content")
+    @classmethod
+    def content_must_be_substantive(cls, v: str) -> str:
+        # NOTE: intentionally a plain @field_validator, not Field(min_length=...) —
+        # a min_length constraint would get baked into model_json_schema() and sent
+        # to Claude as part of output_config.format.schema, where it's an
+        # unsupported JSON Schema feature for structured outputs. A validator runs
+        # client-side only and never touches the schema we send.
+        if len(v.strip()) < _MIN_CONCEPT_CONTENT_CHARS:
+            raise ValueError(
+                "concept content is empty or too short to be real synthesized "
+                f"prose (min {_MIN_CONCEPT_CONTENT_CHARS} chars) — looks like a placeholder"
+            )
+        return v
 
 
 class ModuleProposal(StrictModel):

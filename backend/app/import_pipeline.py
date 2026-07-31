@@ -17,6 +17,8 @@ unit-testable against hand-built ImportDecision objects without ever calling the
 
 import json
 
+from pydantic import ValidationError
+
 from app.claude_client import EFFORT, MAX_TOKENS, MODEL, get_client
 from app.decision_schema import ImportDecision
 from app.models import Concept, Course, Module, SourceMaterial
@@ -44,9 +46,15 @@ invent an ID.
 - Concept `content` fields must be synthesized, organized prose derived from the source \
 material - not a verbatim copy-paste and not a one-line stub. Write it as real course \
 content a learner would read.
+- Never include a placeholder, stub, or empty concept (e.g. a concept titled "placeholder" \
+or "TBD" with no real content). If you don't have room to fully cover every angle the \
+material touches on, include fewer, fully-realized modules and concepts rather than \
+listing more than you can actually write out - a shorter but complete course is always \
+better than a longer one with empty entries.
 - Course and module `description` fields must be concise (1-3 sentences) and \
 semantically representative, since they are also used for future similarity matching \
-against this course.
+against this course. Do not promise coverage (e.g. topics, domains, or angles) in a \
+description that the actual modules and concepts don't deliver.
 - Only set updated_course_description if the new content meaningfully changes what the \
 course as a whole covers; otherwise leave it null.
 """
@@ -116,7 +124,17 @@ def get_decision(title: str, raw_text: str, candidates: list[tuple[Course, float
     if text is None:
         raise ImportDecisionError("Claude's response contained no text content to parse.")
 
-    return ImportDecision.model_validate_json(text)
+    try:
+        return ImportDecision.model_validate_json(text)
+    except ValidationError as exc:
+        # Most commonly hit via ConceptProposal's title/content validators (see
+        # decision_schema.py) rejecting placeholder/empty content — fail loudly
+        # here rather than let bad content reach the database.
+        raise ImportDecisionError(
+            f"Claude's response didn't pass validation (likely placeholder or "
+            f"incomplete content) - try again, or raise CLAUDE_EFFORT if this "
+            f"keeps happening: {exc}"
+        ) from exc
 
 
 def _renumber(items: list, key) -> list:
