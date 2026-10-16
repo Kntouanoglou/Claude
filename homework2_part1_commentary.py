@@ -55,4 +55,19 @@ plt.title("Bar Plot")
 plt.show()
 
 #Part 4: Standard deviation of each column
+# TODO: explain this part in your own words
+SD_list = N * [0]
+for j in range(N):
+    sd = 0
+    for i in range(N):
+        zeta = Ran_lis[i][j] - Mean_lis[j]
+        sd += zeta * zeta
+    SD_list[j] = float(np.sqrt(sd / N))
+
+print(SD_list)
+
 #Part 5: Variance of each column
+# TODO: explain this part in your own words
+Var_list = [sd * sd for sd in SD_list]
+
+print(Var_list)
