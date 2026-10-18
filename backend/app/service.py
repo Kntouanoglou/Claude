@@ -83,6 +83,8 @@ def get_course_detail(db: Session, course_id: int) -> schemas.CourseDetailOut | 
                 schemas.ConceptWithSourceOut(
                     id=concept.id,
                     title=concept.title,
+                    summary=concept.summary,
+                    key_points=json.loads(concept.key_points),
                     content=concept.content,
                     order=concept.order,
                     source_material_id=concept.source_material_id,
@@ -122,6 +124,8 @@ def get_source_material(db: Session, source_material_id: int) -> schemas.SourceM
             schemas.ConceptOut(
                 id=concept.id,
                 title=concept.title,
+                summary=concept.summary,
+                key_points=json.loads(concept.key_points),
                 content=concept.content,
                 order=concept.order,
                 source_material_id=concept.source_material_id,

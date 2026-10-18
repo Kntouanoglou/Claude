@@ -11,6 +11,8 @@ from pydantic import BaseModel
 class ConceptOut(BaseModel):
     id: int
     title: str
+    summary: str
+    key_points: list[str]
     content: str
     order: int
     source_material_id: int

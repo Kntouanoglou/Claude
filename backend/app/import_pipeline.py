@@ -43,9 +43,19 @@ Rules:
 new_course.
 - target_course_id must exactly match one of the candidate course IDs provided - never \
 invent an ID.
-- Concept `content` fields must be synthesized, organized prose derived from the source \
-material - not a verbatim copy-paste and not a one-line stub. Write it as real course \
-content a learner would read.
+- Every concept has three parts, and they must look different from each other, not be \
+the same prose cut into pieces:
+  - `summary`: exactly one plain sentence giving the single takeaway. A learner who \
+reads only this should know what the concept is about.
+  - `key_points`: 3-6 short, self-contained, scannable points (each one sentence or a \
+short clause). These are the concrete facts, steps, distinctions, or examples a learner \
+would want to skim or review later - not a restatement of the summary, and not a \
+paragraph broken into fragments.
+  - `content`: a short explanation (2-5 sentences) that expands on *why* the key points \
+matter or how they connect - not a replay of the key points in paragraph form, and not a \
+transcript-style essay. Never pad `content` with flowing narrative prose, rhetorical \
+questions, or second-person coaching voice ("you might wonder...", "take a moment to..."); \
+write it the way a textbook states a fact.
 - Never include a placeholder, stub, or empty concept (e.g. a concept titled "placeholder" \
 or "TBD" with no real content). If you don't have room to fully cover every angle the \
 material touches on, include fewer, fully-realized modules and concepts rather than \
@@ -188,6 +198,8 @@ def apply_decision(
                     Concept(
                         module_id=module.id,
                         title=concept_proposal.title,
+                        summary=concept_proposal.summary,
+                        key_points=json.dumps(concept_proposal.key_points),
                         content=concept_proposal.content,
                         order=concept_order,
                         source_material_id=source_material.id,
@@ -242,6 +254,8 @@ def apply_decision(
                 Concept(
                     module_id=module.id,
                     title=concept_proposal.title,
+                    summary=concept_proposal.summary,
+                    key_points=json.dumps(concept_proposal.key_points),
                     content=concept_proposal.content,
                     order=max_concept_order + 1 + offset,
                     source_material_id=source_material.id,

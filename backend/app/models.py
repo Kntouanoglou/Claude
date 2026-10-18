@@ -77,7 +77,9 @@ class Concept(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     module_id: Mapped[int] = mapped_column(ForeignKey("module.id"), index=True)
     title: Mapped[str] = mapped_column(String(300))
-    content: Mapped[str] = mapped_column(Text)  # synthesized/organized learning content
+    summary: Mapped[str] = mapped_column(Text)  # one-sentence takeaway, shown as the lead-in
+    key_points: Mapped[str] = mapped_column(Text)  # JSON-serialized list[str]
+    content: Mapped[str] = mapped_column(Text)  # synthesized explanation, expands on the key points
     order: Mapped[int] = mapped_column(Integer)
     source_material_id: Mapped[int] = mapped_column(ForeignKey("source_material.id"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

@@ -26,7 +26,9 @@ class StrictModel(BaseModel):
 
 class ConceptProposal(StrictModel):
     title: str
-    content: str  # synthesized/organized learning content, not a copy-paste of the source
+    summary: str  # one plain-English sentence: the single takeaway of this concept
+    key_points: list[str]  # 3-6 short, scannable, self-contained points
+    content: str  # a short explanation paragraph that expands on the key points
     order: int  # relative ordering hint only — the app renumbers sequentially on write
 
     @field_validator("title")
@@ -36,14 +38,31 @@ class ConceptProposal(StrictModel):
             raise ValueError(f"concept title {v!r} looks like a placeholder, not a real concept title")
         return v
 
-    @field_validator("content")
+    @field_validator("summary")
     @classmethod
-    def content_must_be_substantive(cls, v: str) -> str:
-        # NOTE: intentionally a plain @field_validator, not Field(min_length=...) —
+    def summary_must_be_non_trivial(cls, v: str) -> str:
+        if len(v.strip()) < 10:
+            raise ValueError("concept summary is missing or too short to be a real takeaway")
+        return v
+
+    @field_validator("key_points")
+    @classmethod
+    def key_points_must_be_substantive(cls, v: list[str]) -> list[str]:
+        # NOTE: intentionally plain @field_validators, not Field(min_length=...) —
         # a min_length constraint would get baked into model_json_schema() and sent
         # to Claude as part of output_config.format.schema, where it's an
         # unsupported JSON Schema feature for structured outputs. A validator runs
         # client-side only and never touches the schema we send.
+        cleaned = [p.strip() for p in v if p.strip()]
+        if len(cleaned) < 2:
+            raise ValueError("concept needs at least 2 real key_points, not a placeholder list")
+        if any(len(p) < 10 for p in cleaned):
+            raise ValueError("a key_point is too short to be a real, self-contained point")
+        return cleaned
+
+    @field_validator("content")
+    @classmethod
+    def content_must_be_substantive(cls, v: str) -> str:
         if len(v.strip()) < _MIN_CONCEPT_CONTENT_CHARS:
             raise ValueError(
                 "concept content is empty or too short to be real synthesized "
