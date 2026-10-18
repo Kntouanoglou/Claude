@@ -98,7 +98,13 @@ def get_decision(title: str, raw_text: str, candidates: list[tuple[Course, float
     client = get_client()
     user_content = build_user_content(title, raw_text, candidates)
 
-    response = client.messages.create(
+    # Streaming (rather than a blocking create() call) is the recommended pattern
+    # for requests that may need a large max_tokens - a non-streaming request risks
+    # client-side HTTP timeouts at high output volume, which effort="high" on a
+    # rich transcript can genuinely reach. get_final_message() gives back the same
+    # Message shape as create() once the stream completes, so nothing below needs
+    # to change.
+    with client.messages.stream(
         model=MODEL,
         max_tokens=MAX_TOKENS,
         system=SYSTEM_PROMPT,
@@ -110,14 +116,16 @@ def get_decision(title: str, raw_text: str, candidates: list[tuple[Course, float
             "effort": EFFORT,
         },
         messages=[{"role": "user", "content": user_content}],
-    )
+    ) as stream:
+        response = stream.get_final_message()
 
     if response.stop_reason == "refusal":
         raise ImportDecisionError(f"Claude refused the request: {response.stop_details}")
     if response.stop_reason == "max_tokens":
         raise ImportDecisionError(
-            "Claude's response was truncated at max_tokens before completing the "
-            "structured output; consider raising MAX_TOKENS or lowering CLAUDE_EFFORT."
+            f"Claude's response was truncated at max_tokens ({MAX_TOKENS}) before "
+            "completing the structured output; try raising CLAUDE_MAX_TOKENS or "
+            "lowering CLAUDE_EFFORT in .env."
         )
 
     text = next((block.text for block in response.content if block.type == "text"), None)

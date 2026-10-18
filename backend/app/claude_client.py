@@ -2,11 +2,11 @@ from functools import lru_cache
 
 import anthropic
 
-from app.config import ANTHROPIC_API_KEY, CLAUDE_EFFORT, CLAUDE_MODEL
+from app.config import ANTHROPIC_API_KEY, CLAUDE_EFFORT, CLAUDE_MAX_TOKENS, CLAUDE_MODEL
 
 MODEL = CLAUDE_MODEL
 EFFORT = CLAUDE_EFFORT
-MAX_TOKENS = 8192
+MAX_TOKENS = CLAUDE_MAX_TOKENS
 
 
 @lru_cache(maxsize=1)

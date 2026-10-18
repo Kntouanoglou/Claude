@@ -12,5 +12,6 @@ DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{BASE_DIR / 'data' / '
 EMBEDDING_MODEL_NAME = os.environ.get("EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
 CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-opus-5")
 CLAUDE_EFFORT = os.environ.get("CLAUDE_EFFORT", "medium")
+CLAUDE_MAX_TOKENS = int(os.environ.get("CLAUDE_MAX_TOKENS", "16000"))
 SIMILARITY_TOP_K = int(os.environ.get("SIMILARITY_TOP_K", "3"))
 SIMILARITY_THRESHOLD = float(os.environ.get("SIMILARITY_THRESHOLD", "0.35"))
