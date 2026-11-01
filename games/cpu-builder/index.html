@@ -30,7 +30,7 @@
   color-scheme: dark;
 }
 :root[data-theme="light"] {
-  --bg: #f5f6fb; --panel: #ffffff; --panel2: #f0f1f8; --ink: #1b1e33; --muted: #676c8c; --line: #e3e5f0; --board: #fbfbfe; --dot: #eceef6; --gate: #ffffff; --hi: #4f46e5; --hi-soft: #eef0ff; --on-hi: #ffffff; --lo: #b3b7cb; --float: #0ea5e9; --err: #e11d48; --ok: #059669; --glow: 0 0 0 3px rgba(79, 70, 229, .16); --shadow: 0 1px 2px rgba(27, 30, 51, .04), 0 6px 20px rgba(27, 30, 51, .06);
+  --bg: #f5f6fb; --panel: #ffffff; --panel2: #f0f1f8; --ink: #1b1e33; --muted: #676c8c; --line: #e3e5f0; --board: #fbfbfe; --dot: #eceef6; --gate: #ffffff; --hi: #1d4ed8; --hi-soft: #e8eefc; --on-hi: #ffffff; --lo: #b3b7cb; --float: #8b5cf6; --err: #e11d48; --ok: #059669; --glow: 0 0 0 3px rgba(29, 78, 216, .16); --shadow: 0 1px 2px rgba(27, 30, 51, .04), 0 6px 20px rgba(27, 30, 51, .06);
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -319,7 +319,7 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--hi); o
 .card, .step { border-radius: 18px; }
 .lvcard, .boardwrap { border-radius: 16px; }
 .btn { border-radius: 12px; }
-.btn.primary { box-shadow: 0 4px 14px rgba(79, 70, 229, .25); }
+.btn.primary { box-shadow: 0 4px 14px color-mix(in srgb, var(--hi) 28%, transparent); }
 .hero h1 { font-weight: 800; letter-spacing: -.025em; }
 h2, .st-name, .lvcard .lt { font-weight: 700; }
 .zone { border-radius: 14px; }
