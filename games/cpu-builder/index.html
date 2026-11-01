@@ -1,0 +1,954 @@
+<title>CPU Builder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: home = chip floorplan + level lists; level = sidebar (goal, truth table, cost) beside a dotted circuit board; stacks on phones. */
+:root {
+  --bg: #e7ebe6;
+  --panel: #f7f9f5;
+  --ink: #1a2320;
+  --muted: #586760;
+  --line: #c6cec7;
+  --board: #f2f5f0;
+  --dot: #c0c9c1;
+  --gate: #ffffff;
+  --hi: #c0621a;        /* signal 1: copper */
+  --hi-soft: #f6dcc4;
+  --lo: #8d9a92;        /* signal 0 */
+  --float: #2e6bd3;     /* floating wire */
+  --err: #cc3030;       /* conflict / error */
+  --ok: #23804a;
+  --font-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1311; --panel: #161d1a; --ink: #e2e9e4; --muted: #92a299; --line: #2a3530;
+    --board: #111815; --dot: #26312c; --gate: #1c2521; --hi: #f39a4c; --hi-soft: #3d2614;
+    --lo: #56655d; --float: #6ea0ff; --err: #ff6a6a; --ok: #62cf8c; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1311; --panel: #161d1a; --ink: #e2e9e4; --muted: #92a299; --line: #2a3530;
+  --board: #111815; --dot: #26312c; --gate: #1c2521; --hi: #f39a4c; --hi-soft: #3d2614;
+  --lo: #56655d; --float: #6ea0ff; --err: #ff6a6a; --ok: #62cf8c; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15.5px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+#app { max-width: 1180px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; letter-spacing: .01em; }
+p { margin: 0; }
+code, .mono { font-family: var(--font-mono); font-size: .9em; }
+code { background: var(--board); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; white-space: nowrap; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--hi); outline-offset: 2px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--hi); }
+.btn {
+  border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 7px 12px;
+  display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500;
+}
+.btn:hover { border-color: var(--hi); }
+.btn.primary { background: var(--hi); border-color: var(--hi); color: #fff; font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn[disabled] { opacity: .4; cursor: default; }
+.btn.small { padding: 4px 9px; font-size: 13px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.card h3 { font-size: 15px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.stars { font-size: 18px; letter-spacing: 2px; color: var(--hi); white-space: nowrap; }
+.stars .off { color: var(--line); }
+
+/* ---------- Home ---------- */
+.home { display: flex; flex-direction: column; gap: 28px; }
+.hero { display: flex; flex-direction: column; gap: 8px; }
+.hero h1 { font-size: clamp(36px, 7vw, 60px); line-height: 1; }
+.lede { color: var(--muted); max-width: 62ch; }
+.score { font-family: var(--font-mono); font-size: 14px; color: var(--muted); }
+.score b { color: var(--hi); }
+.sec { font-size: 20px; }
+.die {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 10px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+}
+.blk {
+  border: 1px solid var(--line); border-radius: 6px; padding: 10px; min-height: 84px; min-width: 0;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 6px;
+  background: repeating-linear-gradient(135deg, transparent 0 6px, var(--board) 6px 12px);
+}
+.blk .bn { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.blk .bt { font-family: var(--font-display); font-weight: 600; font-size: 15px; line-height: 1.15; }
+.blk .bv { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.blk.live { background: var(--hi-soft); border-color: var(--hi); }
+.blk.live .bn, .blk.live .bv { color: var(--hi); }
+.meter { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--hi); }
+@media (max-width: 640px) { .die { grid-template-columns: repeat(2, 1fr); } }
+.chapter { display: flex; flex-direction: column; gap: 12px; }
+.chapter header { display: flex; flex-direction: column; gap: 2px; }
+.chapter header p { color: var(--muted); }
+.levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 10px; }
+.lvcard {
+  text-align: left; border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 4px; min-width: 0;
+}
+.lvcard:hover:not([disabled]) { border-color: var(--hi); }
+.lvcard .ln { font-family: var(--font-mono); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.lvcard .lt { font-family: var(--font-display); font-weight: 600; font-size: 17px; }
+.lvcard .ls { font-size: 13.5px; color: var(--muted); }
+.lvcard[disabled] { opacity: .5; cursor: not-allowed; }
+.lvcard .stars { font-size: 14px; }
+.foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+
+/* ---------- Level ---------- */
+.lvtop { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+.lvtop .name { flex: 1 1 200px; min-width: 0; }
+.lvtop h1 { font-size: clamp(24px, 4vw, 32px); line-height: 1.1; }
+.lv { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .lv { grid-template-columns: minmax(0, 1fr); } .stage { order: -1; } }
+.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.goal p { font-size: 16px; }
+.hint { font-size: 14.5px; border-left: 3px solid var(--hi); padding: 2px 0 2px 10px; }
+.msg { font-size: 14.5px; }
+.msg.bad { color: var(--err); }
+.msg.good { color: var(--ok); }
+.tt { overflow-x: auto; }
+.tt table { border-collapse: collapse; width: 100%; font-family: var(--font-mono); font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.tt th, .tt td { padding: 4px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+.tt th { font-size: 11.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.tt th.sep, .tt td.sep { border-left: 1px solid var(--line); }
+.tt tr.cur td { background: var(--hi-soft); }
+.tt .y { color: var(--ok); font-weight: 600; }
+.tt .n { color: var(--err); font-weight: 600; }
+.tt .z { color: var(--float); }
+.tt .e { color: var(--err); }
+.cost { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.cost .big { font-family: var(--font-display); font-size: 30px; font-weight: 700; line-height: 1; }
+.cost .big small { font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.cost ul { margin: 0; padding: 0; list-style: none; font-size: 13.5px; color: var(--muted); font-family: var(--font-mono); }
+
+.stage { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.toolbar .grow { flex: 1; }
+.part { padding: 4px 9px 4px 6px; }
+.part svg { width: 30px; height: 20px; }
+.part .pc { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.boardwrap { background: var(--board); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.boardwrap svg.board { display: block; width: 100%; height: auto; touch-action: none; user-select: none; -webkit-user-select: none; }
+.tip { font-size: 13.5px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 18px; height: 4px; border-radius: 2px; margin-right: 6px; vertical-align: middle; background: currentColor; }
+.legend .l1 { color: var(--hi); } .legend .l0 { color: var(--lo); } .legend .lz { color: var(--float); } .legend .le { color: var(--err); }
+.legend span b { color: var(--muted); font-weight: 500; }
+
+/* board svg */
+.board .dots { fill: var(--dot); }
+.board .g { fill: var(--gate); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.board .gl { fill: none; stroke: var(--ink); stroke-width: 2; }
+.board .st { stroke: var(--ink); stroke-width: 2; }
+.board .gt { font-family: var(--font-mono); font-size: 9px; fill: var(--muted); text-anchor: middle; pointer-events: none; }
+.board .lbl { font-family: var(--font-display); font-weight: 600; font-size: 14px; fill: var(--ink); text-anchor: middle; pointer-events: none; }
+.board .inbox { fill: var(--gate); stroke: var(--ink); stroke-width: 2; }
+.board .inbox.on { fill: var(--hi); stroke: var(--hi); }
+.board .inval { font-family: var(--font-mono); font-weight: 600; font-size: 15px; text-anchor: middle; fill: var(--ink); pointer-events: none; }
+.board .inbox.on + .inval { fill: #fff; }
+.board .lamp { stroke-width: 2; }
+.board .lamp.v1 { fill: var(--hi); stroke: var(--hi); }
+.board .lamp.v0 { fill: var(--gate); stroke: var(--lo); }
+.board .lamp.vz { fill: var(--gate); stroke: var(--float); stroke-dasharray: 4 3; }
+.board .lamp.ve { fill: var(--gate); stroke: var(--err); }
+.board .lampv { font-family: var(--font-mono); font-weight: 600; font-size: 13px; text-anchor: middle; fill: var(--muted); pointer-events: none; }
+.board .lamp.v1 + .lampv { fill: #fff; }
+.board .wire { fill: none; stroke-width: 3; stroke-linecap: round; }
+.board .wire.v1 { stroke: var(--hi); stroke-width: 4; }
+.board .wire.v0 { stroke: var(--lo); }
+.board .wire.vz { stroke: var(--float); stroke-dasharray: 6 4; }
+.board .wire.ve { stroke: var(--err); }
+.board .wire.sel { stroke-width: 6; }
+.board .whit { fill: none; stroke: transparent; stroke-width: 16; cursor: pointer; }
+.board .tmp { fill: none; stroke: var(--hi); stroke-width: 3; stroke-dasharray: 5 4; pointer-events: none; }
+.board .pin { stroke: var(--ink); stroke-width: 1.5; fill: var(--gate); pointer-events: none; }
+.board .pin.v1 { fill: var(--hi); stroke: var(--hi); }
+.board .pin.vz { stroke: var(--float); }
+.board .pin.ve { fill: var(--err); stroke: var(--err); }
+.board .pin.pend { fill: var(--hi); stroke: var(--hi); r: 6; }
+.board .hit { fill: transparent; cursor: crosshair; }
+.board .comp { cursor: grab; }
+.board .selbox { fill: none; stroke: var(--hi); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.board .glow { filter: drop-shadow(0 0 3px var(--hi)); }
+
+/* CMOS board */
+.cmos { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; padding: 16px; align-items: stretch; }
+@media (max-width: 520px) { .cmos { grid-template-columns: minmax(0, 1fr); } }
+.stack { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+.rail { font-family: var(--font-mono); font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 6px; display: flex; justify-content: space-between; gap: 8px; }
+.rail.vdd { background: var(--hi); color: #fff; }
+.rail.gnd { background: var(--lo); color: #fff; }
+.zone { border: 2px solid var(--line); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 10px; background: var(--panel); position: relative; }
+.zone.on.pu { border-color: var(--hi); }
+.zone.on.pd { border-color: var(--lo); background: var(--board); }
+.zone .zh { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center; }
+.zone .zt { font-family: var(--font-display); font-weight: 600; font-size: 15px; }
+.zone .zs { font-size: 12.5px; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 4px 10px; font-size: 13px; }
+.seg button.on { background: var(--ink); color: var(--panel); }
+.vlink { width: 2px; height: 16px; background: var(--line); margin: 0 auto; }
+.vlink.on { background: var(--hi); }
+.tnet { display: flex; gap: 10px; justify-content: center; align-items: center; min-height: 92px; padding: 8px; border-radius: 8px; }
+.tnet.series { flex-direction: column; gap: 0; }
+.tnet.parallel { flex-direction: row; flex-wrap: wrap; border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); border-radius: 0; }
+.tnet.series .tr + .tr { margin-top: 14px; position: relative; }
+.tnet.series .tr + .tr::before { content: ""; position: absolute; top: -16px; left: 50%; width: 2px; height: 14px; background: var(--line); }
+.tnet .empty { font-size: 13px; color: var(--muted); }
+.tr { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; background: var(--gate); }
+.tr.on { border-color: var(--hi); }
+.tr svg { width: 30px; height: 40px; flex: none; }
+.tr svg .sw { stroke: var(--lo); stroke-width: 3; stroke-linecap: round; fill: none; }
+.tr.on svg .sw { stroke: var(--hi); }
+.tr svg .term { fill: var(--ink); }
+.tr .tk { font-family: var(--font-mono); font-size: 12px; line-height: 1.2; }
+.tr .tk b { display: block; font-size: 13px; }
+.tr .tin { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 2px 8px; font-family: var(--font-mono); font-weight: 600; }
+.tr .tx { border: 0; background: transparent; color: var(--muted); font-size: 16px; padding: 0 4px; }
+.outnode { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 0; }
+.outnode .wire { width: 2px; align-self: stretch; }
+.bulb { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 700; font-size: 18px; border: 3px solid var(--lo); background: var(--gate); }
+.bulb.v1 { background: var(--hi); border-color: var(--hi); color: #fff; box-shadow: 0 0 18px var(--hi); }
+.bulb.v0 { border-color: var(--lo); color: var(--muted); }
+.bulb.vz { border-color: var(--float); border-style: dashed; color: var(--float); }
+.bulb.vs { border-color: var(--err); color: var(--err); background: var(--panel); animation: buzz .25s infinite alternate; }
+@keyframes buzz { from { transform: translateX(-1px); } to { transform: translateX(1px); } }
+@media (prefers-reduced-motion: reduce) { .bulb.vs { animation: none; } }
+.outnode .ot { font-size: 14px; max-width: 26ch; }
+.inputs { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+@media (max-width: 520px) { .inputs { flex-direction: row; justify-content: center; } }
+.toggle { border: 2px solid var(--ink); background: var(--gate); border-radius: 10px; width: 64px; height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--font-mono); }
+.toggle b { font-family: var(--font-display); font-size: 13px; }
+.toggle span { font-size: 20px; font-weight: 700; }
+.toggle.on { background: var(--hi); border-color: var(--hi); color: #fff; }
+.addrow { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+
+/* Truth-table exercise */
+.ttx { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.ttx .q { font-family: var(--font-display); font-size: 20px; font-weight: 600; }
+.choices { display: flex; gap: 8px; flex-wrap: wrap; }
+.choices .btn { font-family: var(--font-mono); font-size: 18px; min-width: 60px; justify-content: center; }
+.choices .btn.wrong { border-color: var(--err); color: var(--err); }
+.grid8 { overflow-x: auto; }
+.grid8 table { border-collapse: separate; border-spacing: 4px; margin: 0 auto; }
+.grid8 th { font-family: var(--font-display); font-size: 16px; padding: 2px 8px; }
+.grid8 th.sep { padding-left: 18px; }
+.grid8 td.sep { padding-left: 14px; }
+.cell { width: 46px; height: 38px; border: 1.5px solid var(--line); border-radius: 7px; background: var(--gate); font-family: var(--font-mono); font-size: 17px; font-weight: 600; }
+.cell.v1 { background: var(--hi); border-color: var(--hi); color: #fff; }
+.cell.bad { border-color: var(--err); box-shadow: 0 0 0 2px var(--err); }
+
+/* Modal */
+.overlay { position: fixed; inset: 0; background: rgba(10, 16, 13, .5); display: grid; place-items: center; padding: 16px; z-index: 50; }
+.overlay[hidden] { display: none; }
+.sheet { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; max-width: 560px; width: 100%; max-height: 86vh; overflow: auto; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+.sheet h2 { font-size: 24px; }
+.sheet .stars { font-size: 34px; }
+.sheet ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.sheet .why { background: var(--board); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.sheet .why b.k { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--hi); }
+.sheet .rule { background: var(--hi-soft); border-radius: 8px; padding: 10px 12px; }
+.sheet table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.sheet th, .sheet td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.sheet th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.unlock { font-family: var(--font-mono); font-size: 14px; color: var(--hi); }
+</style>
+
+<div id="app"></div>
+<div id="modal" class="overlay" hidden></div>
+
+<script>
+/* =================== Storage =================== */
+const STORE = 'cpu-builder-v1';
+function loadSave() {
+  try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.stars) return Object.assign({ stars: {}, boards: {} }, s); } catch (e) {}
+  return { stars: {}, boards: {} };
+}
+let S = loadSave();
+function persist() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
+const app = document.getElementById('app');
+const modal = document.getElementById('modal');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* =================== Gates =================== */
+const GATES = {
+  NOT:  { n: 1, w: 50, cost: 2,  f: a => !a[0] },
+  BUF:  { n: 1, w: 50, cost: 4,  f: a => !!a[0] },
+  NAND: { n: 2, w: 60, cost: 4,  f: a => !(a[0] && a[1]) },
+  NOR:  { n: 2, w: 60, cost: 4,  f: a => !(a[0] || a[1]) },
+  AND:  { n: 2, w: 60, cost: 6,  f: a => !!(a[0] && a[1]) },
+  OR:   { n: 2, w: 60, cost: 6,  f: a => !!(a[0] || a[1]) },
+  XOR:  { n: 2, w: 60, cost: 16, f: a => a[0] !== a[1] },
+  XNOR: { n: 2, w: 60, cost: 16, f: a => a[0] === a[1] },
+};
+function shape(t) {
+  const st2 = `<line class="st" x1="0" y1="10" x2="12" y2="10"/><line class="st" x1="0" y1="30" x2="12" y2="30"/>`;
+  const bub = cx => `<circle class="g" cx="${cx}" cy="20" r="4"/>`;
+  const lab = (x) => `<text class="gt" x="${x}" y="23">${t}</text>`;
+  switch (t) {
+    case 'AND':  return st2 + `<path class="g" d="M8,2 H32 A18,18 0 0 1 32,38 H8 Z"/><line class="st" x1="50" y1="20" x2="60" y2="20"/>` + lab(27);
+    case 'NAND': return st2 + `<path class="g" d="M8,2 H28 A18,18 0 0 1 28,38 H8 Z"/>${bub(50)}<line class="st" x1="54" y1="20" x2="60" y2="20"/>` + lab(25);
+    case 'OR':   return st2 + `<path class="g" d="M6,2 Q32,2 50,20 Q32,38 6,38 Q17,20 6,2 Z"/><line class="st" x1="50" y1="20" x2="60" y2="20"/>` + lab(27);
+    case 'NOR':  return st2 + `<path class="g" d="M6,2 Q30,2 46,20 Q30,38 6,38 Q17,20 6,2 Z"/>${bub(50)}<line class="st" x1="54" y1="20" x2="60" y2="20"/>` + lab(25);
+    case 'XOR':  return st2 + `<path class="g" d="M12,2 Q34,2 50,20 Q34,38 12,38 Q23,20 12,2 Z"/><path class="gl" d="M5,2 Q16,20 5,38"/><line class="st" x1="50" y1="20" x2="60" y2="20"/>` + lab(30);
+    case 'XNOR': return st2 + `<path class="g" d="M12,2 Q32,2 46,20 Q32,38 12,38 Q23,20 12,2 Z"/><path class="gl" d="M5,2 Q16,20 5,38"/>${bub(50)}<line class="st" x1="54" y1="20" x2="60" y2="20"/>` + `<text class="gt" x="28" y="23" style="font-size:8px">XNOR</text>`;
+    case 'NOT':  return `<line class="st" x1="0" y1="20" x2="6" y2="20"/><path class="g" d="M6,4 L38,20 L6,36 Z"/>${bub(42)}<line class="st" x1="46" y1="20" x2="50" y2="20"/>`;
+    case 'BUF':  return `<line class="st" x1="0" y1="20" x2="6" y2="20"/><path class="g" d="M6,4 L42,20 L6,36 Z"/><line class="st" x1="42" y1="20" x2="50" y2="20"/>`;
+  }
+  return '';
+}
+function partIcon(t) {
+  if (t === 'IN') return `<svg viewBox="-2 -2 58 36"><rect x="0" y="0" width="44" height="32" rx="6" fill="none" stroke="currentColor" stroke-width="3"/><line x1="44" y1="16" x2="54" y2="16" stroke="currentColor" stroke-width="3"/></svg>`;
+  if (t === 'OUT') return `<svg viewBox="-2 -2 46 36"><line x1="0" y1="16" x2="12" y2="16" stroke="currentColor" stroke-width="3"/><circle cx="26" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="3"/></svg>`;
+  return `<svg viewBox="-2 0 64 40" class="board" style="width:30px;height:20px">${shape(t).replace(/<text[^>]*>[^<]*<\/text>/g, '')}</svg>`;
+}
+
+/* =================== Levels =================== */
+const NOTES = {
+  basics: `<p class="rule"><b>One driver per wire.</b> Two outputs on one wire is a conflict (red). Nothing driving a wire leaves it floating (blue). One output can feed many inputs.</p>
+    <ul><li><b>Inputs</b> come from outside (switches); the circuit only reads them.</li><li><b>Outputs</b> are computed from the inputs and control something (here, a light).</li></ul>`,
+  cmos: `<p class="rule"><b>CMOS:</b> n-type transistors turn on when the input is 1 and pull the output to 0. p-type turn on when the input is 0 and pull the output to 1.</p>
+    <ul><li>The <b>pull-up network</b> (p-types) connects the output to 1. The <b>pull-down network</b> (n-types) connects it to 0.</li>
+    <li>So a single CMOS gate is always <b>inverting</b>: NOT, NAND and NOR are built directly.</li>
+    <li><b>Series</b>: every transistor must be on to conduct (like AND). <b>Parallel</b>: any one on is enough (like OR).</li></ul>`,
+  count: `<p class="rule"><b>Transistor count:</b> NOT, NAND, NOR = inputs × 2. AND, OR = inputs × 2 + 2 (AND = NAND + NOT, OR = NOR + NOT). A gate with tied inputs counts at full size: <code>NOR(A, A) = 4</code>.</p>`,
+  nand: `<table class="mini"><tr><th>Need</th><th>NAND-only</th><th>NOR-only</th></tr>
+    <tr><td>NOT x</td><td>NAND with both inputs = x</td><td>NOR with both inputs = x</td></tr>
+    <tr><td>x AND y</td><td>NAND(x, y), then NOT</td><td><code>NOR(x', y')</code></td></tr>
+    <tr><td>x OR y</td><td><code>NAND(x', y')</code></td><td>NOR(x, y), then NOT</td></tr></table>`,
+  demorgan: `<p class="rule"><b>De Morgan:</b> <code>(AB)' = A' + B'</code> and <code>(A + B)' = A'B'</code>. Break the bar, change the sign.</p>`,
+};
+
+const LEVELS = [
+  { id: 'wire', ch: 1, kind: 'gate', title: 'First wire', sub: 'Learn the board',
+    inputs: ['A'], outputs: ['F'], parts: [], fn: v => ({ F: v.A }), t2: 0, t3: 0,
+    goal: 'Connect switch <b>A</b> to light <b>F</b>. Then tap A to flip it and watch the light follow.',
+    notes: NOTES.basics + `<p>Wire colors: <b style="color:var(--hi)">copper = 1</b>, grey = 0, <b style="color:var(--float)">dashed blue = floating</b>, <b style="color:var(--err)">red = conflict</b>.</p>`,
+    why: 'A wire copies a signal from its one driver to everything connected to it. The light shows whatever drives its wire.',
+    hints: ['Drag from the small dot on the right edge of switch A.', 'Let go on the small dot on the left edge of light F.', 'On a phone you can also tap A\'s dot, then tap F\'s dot.'] },
+
+  { id: 'one', ch: 1, kind: 'cmos', title: 'One switch', sub: 'Meet the n-type',
+    inputs: ['A'], fn: v => v.A ? 0 : 'Z', t2: 1, t3: 1, max: 1,
+    goal: 'Put <b>one n-type</b> transistor in the pull-down network. The target: output 0 when A = 1, and floating (nothing connected) when A = 0.',
+    notes: NOTES.cmos,
+    why: 'With A = 0 the n-type is open, so nothing drives the output: it floats. With A = 1 it closes and connects the output to ground (0). Half an inverter: next level adds the other half.',
+    hints: ['Press "+ n-type" under the pull-down network (the bottom box).', 'n-type closes when its input is 1.', 'Leave the pull-up network empty for now.'] },
+
+  { id: 'not', ch: 1, kind: 'cmos', title: 'NOT', sub: 'Your first gate', unlock: 'NOT',
+    inputs: ['A'], fn: v => v.A ? 0 : 1, t2: 2, t3: 2, max: 2,
+    goal: 'Build an inverter: output 1 when A = 0, output 0 when A = 1. Use one p-type and one n-type.',
+    notes: NOTES.cmos + NOTES.count,
+    why: 'A = 0: the p-type closes and connects the output to 1. A = 1: the n-type closes and connects it to 0. Exactly one side conducts at any time. That is an inverter, and it costs 2 transistors (inputs × 2).',
+    hints: ['p-types belong in the pull-up network (top), n-types in the pull-down (bottom).', 'Both transistors take input A.', 'One p-type on top, one n-type on the bottom, both on A.'] },
+
+  { id: 'nand', ch: 1, kind: 'cmos', title: 'NAND', sub: 'Series and parallel', unlock: 'NAND',
+    inputs: ['A', 'B'], fn: v => (v.A && v.B) ? 0 : 1, t2: 4, t3: 4, max: 3,
+    goal: 'Build NAND: the output is 0 <b>only</b> when A and B are both 1. Choose series or parallel for each network.',
+    notes: NOTES.cmos + NOTES.count,
+    why: 'Pull-down in series: both n-types must be on (A = 1 and B = 1) to reach 0. Pull-up in parallel: any input at 0 closes a p-type and connects the output to 1. Output = (A·B)\'. 2 inputs × 2 = 4 transistors.',
+    hints: ['You need two p-types and two n-types, one of each on A and on B.', 'The output must reach 0 only when BOTH inputs are 1. Which arrangement needs every switch closed?', 'Pull-down: series. Pull-up: parallel.'] },
+
+  { id: 'nor', ch: 1, kind: 'cmos', title: 'NOR', sub: 'The mirror image', unlock: 'NOR',
+    inputs: ['A', 'B'], fn: v => (v.A || v.B) ? 0 : 1, t2: 4, t3: 4, max: 3,
+    goal: 'Build NOR: the output is 1 <b>only</b> when A and B are both 0.',
+    notes: NOTES.cmos + NOTES.count,
+    why: 'Pull-up in series: both p-types must be on (A = 0 and B = 0) to reach 1. Pull-down in parallel: any 1 connects the output to 0. NOR is NAND with series and parallel swapped.',
+    hints: ['Same parts as NAND.', 'Now the output reaches 1 only when both inputs are 0.', 'Pull-up: series. Pull-down: parallel.'] },
+
+  { id: 'short', ch: 1, kind: 'cmos', title: 'Short circuit', sub: 'Find the bug',
+    inputs: ['A', 'B'], fn: v => (v.A && v.B) ? 0 : 1, t2: 4, t3: 4, max: 3,
+    prefill: { pu: { mode: 'parallel', ts: [{ t: 'p', in: 'A' }, { t: 'p', in: 'B' }] }, pd: { mode: 'parallel', ts: [{ t: 'n', in: 'A' }, { t: 'n', in: 'B' }] } },
+    goal: 'This NAND is broken. For some inputs, power connects straight to ground. Flip the inputs to find when it shorts, then fix it.',
+    notes: NOTES.cmos + `<p class="rule">In a working CMOS gate, the pull-up and pull-down networks are <b>complements</b>: when one conducts, the other is open. Series on one side means parallel on the other.</p>`,
+    why: 'With both networks in parallel, A = 1, B = 0 turns on the n-type on A and the p-type on B at the same time: a direct path from 1 to 0. Making the pull-down series means it only conducts when the pull-up cannot.',
+    hints: ['Try A = 1, B = 0. Which transistors are on?', 'Both boxes conduct at once. One of them needs a different arrangement.', 'Switch the pull-down network to series.'] },
+
+  { id: 'table', ch: 2, kind: 'truth', title: 'Reading the table', sub: 'Truth tables by hand',
+    goal: 'Before building gates from tables, build a table yourself: count the rows, fill the inputs in order, then fill the output.',
+    notes: `<ul><li>Rows = <b>2ⁿ</b> (n = number of inputs).</li><li>The last column switches every row; each column to the left switches half as often (blocks of 1, 2, 4, 8…).</li><li>First row all 0s, last row all 1s. Fill column by column.</li></ul>
+      <p class="rule">NOR is 1 only when <b>all</b> inputs are 0: <code>F = (A + B + C)'</code></p>`,
+    why: 'Each new input doubles the rows, because every earlier row appears once with the new input at 0 and once at 1. Counting in binary from 000 to 111 lists every combination exactly once.',
+    hints: ['Each input has 2 values, so 3 inputs give 2 × 2 × 2 combinations.', 'Column C: 0 1 0 1 0 1 0 1. Column B: 0 0 1 1 0 0 1 1. Column A: four 0s, then four 1s.', 'For NOR, only the first row (0 0 0) gets F = 1.'] },
+
+  { id: 'nand-not', ch: 2, kind: 'gate', title: 'NOT from NAND', sub: 'Universal gates',
+    inputs: ['A'], outputs: ['F'], parts: ['NAND'], fn: v => ({ F: 1 - v.A }), t2: 4, t3: 4,
+    goal: 'You only have NAND. Make F = A\' (NOT A).',
+    notes: `<p class="rule"><b>Universal gates: NAND and NOR.</b> Each one alone can build any circuit.</p>` + NOTES.nand + NOTES.count,
+    why: 'NAND(A, A) = (A·A)\' = A\'. Tying the inputs together turns NAND into NOT. It costs 4 transistors, though, twice a real NOT: tied inputs count at full size.',
+    hints: ['One NAND is enough.', 'What happens if both NAND inputs get the same signal?', 'Wire A to both inputs of the NAND, and its output to F.'] },
+
+  { id: 'and', ch: 2, kind: 'gate', title: 'AND', sub: 'Derived gates', unlock: 'AND',
+    inputs: ['A', 'B'], outputs: ['F'], parts: ['NAND', 'NOT'], fn: v => ({ F: v.A & v.B }), t2: 8, t3: 6,
+    goal: 'Build AND: F = A·B. Three stars for matching the real CMOS cost.',
+    notes: NOTES.count + `<p>AND is a <b>derived</b> gate: CMOS can't build it in one stage, because single gates always invert.</p>`,
+    why: 'AND = NAND followed by NOT: ((A·B)\')\' = A·B. That is 4 + 2 = 6 transistors, the "inputs × 2 + 2" rule. A NAND used as a NOT costs 8.',
+    hints: ['NAND gives the opposite of what you want.', 'Invert the NAND output.', 'NAND(A, B) → NOT → F. Use the NOT chip for 3 stars.'] },
+
+  { id: 'or', ch: 2, kind: 'gate', title: 'OR from NAND', sub: 'De Morgan in hardware', unlock: 'OR',
+    inputs: ['A', 'B'], outputs: ['F'], parts: ['NAND', 'NOT'], fn: v => ({ F: v.A | v.B }), t2: 12, t3: 8,
+    goal: 'Build OR (F = A + B) from NAND and NOT.',
+    notes: NOTES.demorgan + NOTES.nand,
+    why: 'NAND(A\', B\') = (A\'·B\')\' = A + B by De Morgan. Two NOTs and one NAND: 2 + 2 + 4 = 8 transistors.',
+    hints: ['Look at the "x OR y" row of the NAND-only table.', 'Invert both inputs first.', 'NOT A and NOT B go into one NAND.'] },
+
+  { id: 'nor-and', ch: 2, kind: 'gate', title: 'AND from NOR', sub: 'NOR is universal too',
+    inputs: ['A', 'B'], outputs: ['F'], parts: ['NOR'], fn: v => ({ F: v.A & v.B }), t2: 12, t3: 12,
+    goal: 'Only NOR this time. Build F = A·B.',
+    notes: NOTES.demorgan + NOTES.nand,
+    why: 'Make A\' = NOR(A, A) and B\' = NOR(B, B), then NOR(A\', B\') = (A\' + B\')\' = A·B. Three NORs, 12 transistors.',
+    hints: ['Use the "x AND y" row of the NOR-only column.', 'You need A\' and B\'. A NOR with tied inputs is a NOT.', 'NOR(A,A) and NOR(B,B) feed a third NOR.'] },
+
+  { id: 'inverted', ch: 2, kind: 'gate', title: 'Already inverted', sub: 'Tip from your sheet',
+    inputs: ['Ab', 'C'], labels: { Ab: "A'" }, outputs: ['F'], parts: ['NOR', 'NOT'],
+    fn: v => ({ F: (1 - v.Ab) & (1 - v.C) }), t2: 8, t3: 4,
+    goal: 'The switch gives you <b>A\'</b>, not A. Build F = A·C\'.',
+    notes: `<p class="rule">If an input is already inverted, don't invert it again: <code>A·C' = NOR(A', C)</code></p>` + NOTES.demorgan,
+    why: 'NOR(A\', C) = (A\' + C)\' = A·C\'. You already had A\', so one NOR does the whole job: 4 transistors. Inverting A\' back into A first wastes gates.',
+    hints: ['Write the NOR of the two inputs and simplify it with De Morgan.', '(A\' + C)\' = ?', 'A single NOR on A\' and C is the answer.'] },
+
+  { id: 'shared', ch: 2, kind: 'gate', title: 'Shared signal', sub: 'Make it once, reuse it',
+    inputs: ['A', 'B', 'C'], outputs: ['X', 'Y'], parts: ['NAND', 'NOT'],
+    fn: v => ({ X: ((1 - v.A) & v.B) ? 0 : 1, Y: ((1 - v.A) & v.C) ? 0 : 1 }), t2: 12, t3: 10,
+    goal: 'Two outputs: X = NAND(A\', B) and Y = NAND(A\', C). Both need A\'.',
+    notes: `<p class="rule">Make a shared signal (like <code>A'</code>) once and feed it to every gate that needs it.</p>` + NOTES.basics,
+    why: 'One NOT makes A\' and its output feeds both NANDs: 2 + 4 + 4 = 10. A second NOT for the same signal adds 2 transistors for nothing.',
+    hints: ['Both outputs need A\'.', 'One output can feed many inputs.', 'Make one NOT on A and wire its output to both NANDs.'] },
+
+  { id: 'buffer', ch: 2, kind: 'gate', title: 'Buffer', sub: 'Two NOTs make a copy', unlock: 'BUF', requireGate: true,
+    inputs: ['A'], outputs: ['F'], parts: ['NOT'], fn: v => ({ F: v.A }), t2: 4, t3: 4,
+    goal: 'Build a buffer: F = A, using gates (a plain wire doesn\'t count).',
+    notes: `<p class="rule"><b>Buffer:</b> output equals input. Used to strengthen or delay a signal. Built from NOT + NOT.</p><p>Double bar cancels: <code>(A')' = A</code>.</p>`,
+    why: '(A\')\' = A. A buffer keeps the value but drives a fresh, strong signal. Inside your own logic, two NOTs in a row are wasted gates: delete both.',
+    hints: ['One NOT gives A\'.', 'Invert it again.', 'A → NOT → NOT → F.'] },
+
+  { id: 'xor', ch: 2, kind: 'gate', title: 'XOR', sub: 'The chapter puzzle', unlock: 'XOR',
+    inputs: ['A', 'B'], outputs: ['F'], parts: ['NAND'], fn: v => ({ F: v.A ^ v.B }), t2: 20, t3: 16,
+    goal: 'NAND only. Build XOR: F = 1 when A and B are different. Two stars at 20 transistors, three at 16.',
+    notes: `<p>XOR: output is 1 when the inputs are different. <code>A ⊕ B = A·B' + A'·B</code></p>` + NOTES.nand + NOTES.demorgan,
+    why: 'N = NAND(A, B). Then NAND(A, N) = A\' + A·B = A\' + B, and NAND(B, N) = A + B\'. The final NAND gives ((A\' + B)·(A + B\'))\' = A·B\' + A\'·B by De Morgan, which is XOR. Sharing N between two gates saves one NAND: 4 NANDs, 16 transistors.',
+    hints: ['Straight from SOP: two NOTs (as NANDs), two NANDs, one final NAND = 20. That earns two stars.', 'For three stars, start with N = NAND(A, B). It is 0 only when both inputs are 1.', 'Feed N into NAND(A, N) and NAND(B, N), then combine those two with a fourth NAND.'] },
+
+  { id: 'xnor', ch: 2, kind: 'gate', title: 'XNOR', sub: 'Cheapest wins', unlock: 'XNOR',
+    inputs: ['A', 'B'], outputs: ['F'], parts: ['NAND', 'NOR', 'NOT', 'XOR'], fn: v => ({ F: 1 - (v.A ^ v.B) }), t2: 18, t3: 16,
+    goal: 'Build XNOR: F = 1 when A and B are the same. Any parts you like. Can you beat XOR + NOT?',
+    notes: `<p>XNOR is the opposite of XOR: <code>(A ⊕ B)'</code>. Your XOR chip counts as 16 transistors (4 NANDs).</p>` + NOTES.count,
+    why: 'XOR + NOT = 18. Four NORs in the same shape as the NAND XOR give XNOR directly: N = NOR(A, B), then NOR(A, N), NOR(B, N), and a final NOR. 16 transistors. NAND and NOR are mirror images, and so are their circuits.',
+    hints: ['XOR followed by NOT works: 18 transistors, two stars.', 'Your NAND XOR used 4 gates. Try the same wiring with a different gate.', 'N = NOR(A, B); NOR(A, N); NOR(B, N); final NOR of those two.'] },
+];
+const CHAPTERS = [
+  { n: 1, t: 'Switches', v: 'Version 1', d: 'Transistors and CMOS gates' },
+  { n: 2, t: 'Gates', v: 'Version 1', d: 'NAND, NOR and the universal gates' },
+  { n: 3, t: 'Simplify', v: 'Version 2' }, { n: 4, t: 'Arithmetic', v: 'Version 2' },
+  { n: 5, t: 'Negatives', v: 'Version 2' }, { n: 6, t: 'Choosing', v: 'Version 3' },
+  { n: 7, t: 'The ALU', v: 'Version 3' }, { n: 8, t: 'Memory', v: 'Version 3' },
+  { n: 9, t: 'The CPU', v: 'Version 4' }, { n: 10, t: 'Run it', v: 'Version 4' },
+];
+const PART_ORDER = ['NOT', 'NAND', 'NOR', 'AND', 'OR', 'BUF', 'XOR', 'XNOR'];
+function unlockedParts() {
+  const u = new Set();
+  LEVELS.forEach(l => { if (l.unlock && S.stars[l.id]) u.add(l.unlock); });
+  return PART_ORDER.filter(p => u.has(p));
+}
+function isOpen(i) { return i === 0 || !!S.stars[LEVELS[i - 1].id]; }
+function starStr(n, total = 3) { let s = ''; for (let i = 0; i < total; i++) s += i < n ? '★' : '<span class="off">★</span>'; return s; }
+
+/* =================== Simulation =================== */
+function pinsOf(c) {
+  if (c.type === 'IN') return [{ id: 'o', x: 52, y: 16, out: 1 }];
+  if (c.type === 'OUT') return [{ id: 'i', x: 0, y: 16 }];
+  const g = GATES[c.type];
+  if (g.n === 1) return [{ id: 'i0', x: 0, y: 20 }, { id: 'o', x: g.w, y: 20, out: 1 }];
+  return [{ id: 'i0', x: 0, y: 10 }, { id: 'i1', x: 0, y: 30 }, { id: 'o', x: 60, y: 20, out: 1 }];
+}
+function bbox(c) { if (c.type === 'IN') return { w: 52, h: 32 }; if (c.type === 'OUT') return { w: 42, h: 32 }; return { w: GATES[c.type].w, h: 40 }; }
+function simulate(circ, inVals) {
+  const par = {};
+  const find = x => { if (!(x in par)) par[x] = x; while (par[x] !== x) { par[x] = par[par[x]]; x = par[x]; } return x; };
+  for (const c of circ.comps) for (const p of pinsOf(c)) find(c.id + ':' + p.id);
+  for (const w of circ.wires) { if (!(w.a in par) || !(w.b in par)) continue; const a = find(w.a), b = find(w.b); if (a !== b) par[a] = b; }
+  const drv = {};
+  for (const c of circ.comps) for (const p of pinsOf(c)) if (p.out) { const n = find(c.id + ':' + p.id); (drv[n] || (drv[n] = [])).push(c.id); }
+  const out = {};
+  for (const c of circ.comps) out[c.id] = c.type === 'IN' ? (inVals && c.id in inVals ? inVals[c.id] : (c.v || 0)) : 0;
+  const nets = [...new Set(Object.keys(par).map(find))];
+  let nv = {}, stable = false;
+  const calc = () => { nv = {}; for (const n of nets) { const d = drv[n] || []; nv[n] = d.length === 0 ? 'Z' : d.length > 1 ? 'E' : out[d[0]]; } };
+  for (let it = 0; it < 64; it++) {
+    calc(); let ch = false;
+    for (const c of circ.comps) {
+      if (c.type === 'IN' || c.type === 'OUT') continue;
+      const ins = pinsOf(c).filter(p => !p.out).map(p => nv[find(c.id + ':' + p.id)]);
+      const v = ins.some(x => x === 'Z' || x === 'E') ? 'E' : (GATES[c.type].f(ins) ? 1 : 0);
+      if (out[c.id] !== v) { out[c.id] = v; ch = true; }
+    }
+    if (!ch) { stable = true; break; }
+  }
+  calc();
+  const outVal = {};
+  for (const c of circ.comps) if (c.type === 'OUT') outVal[c.id] = nv[find(c.id + ':i')];
+  return { nv, find, out, stable, outVal };
+}
+function circCost(circ) { return circ.comps.reduce((a, c) => a + (GATES[c.type] ? GATES[c.type].cost : 0), 0); }
+function rowsFor(n) { const r = []; for (let i = 0; i < (1 << n); i++) { const row = []; for (let b = n - 1; b >= 0; b--) row.push((i >> b) & 1); r.push(row); } return r; }
+
+/* =================== Board geometry =================== */
+const BW = 600, BH = 420;
+function makeCirc(lv) {
+  const comps = [];
+  const ni = lv.inputs.length, no = lv.outputs.length;
+  lv.inputs.forEach((k, i) => comps.push({ id: 'in-' + k, type: 'IN', key: k, label: (lv.labels && lv.labels[k]) || k, x: 20, y: Math.round((BH / (ni + 1)) * (i + 1) - 16), v: 0, fixed: 1 }));
+  lv.outputs.forEach((k, i) => comps.push({ id: 'out-' + k, type: 'OUT', key: k, label: k, x: BW - 62, y: Math.round((BH / (no + 1)) * (i + 1) - 16), fixed: 1 }));
+  return { comps, wires: [], seq: 1 };
+}
+function loadCirc(lv) {
+  const saved = S.boards[lv.id];
+  if (saved && saved.comps) {
+    const base = lv.sandbox ? { comps: [], wires: [] } : makeCirc(lv);
+    for (const f of base.comps) if (!saved.comps.some(c => c.id === f.id)) saved.comps.push(f);
+    return saved;
+  }
+  if (lv.sandbox) return { comps: [
+    { id: 'in-A', type: 'IN', label: 'A', x: 20, y: 120, v: 0 }, { id: 'in-B', type: 'IN', label: 'B', x: 20, y: 260, v: 0 },
+    { id: 'out-F', type: 'OUT', label: 'F', x: BW - 62, y: 190 } ], wires: [], seq: 1 };
+  return makeCirc(lv);
+}
+function pinPos(circ, key) {
+  const [id, pid] = key.split(':'); const c = circ.comps.find(c => c.id === id); if (!c) return null;
+  const p = pinsOf(c).find(p => p.id === pid); return p ? { x: c.x + p.x, y: c.y + p.y, out: p.out } : null;
+}
+function wirePath(a, b) {
+  const dx = Math.max(26, Math.abs(b.x - a.x) / 2);
+  const ha = a.out ? dx : -dx, hb = b.out === undefined ? 0 : (b.out ? dx : -dx);
+  return `M${a.x},${a.y} C${a.x + ha},${a.y} ${b.x + hb},${b.y} ${b.x},${b.y}`;
+}
+const vcls = v => v === 1 ? 'v1' : v === 0 ? 'v0' : v === 'Z' ? 'vz' : 've';
+
+/* =================== State =================== */
+let cur = null;      // active level session
+let drag = null, rafPending = false;
+
+/* =================== Home =================== */
+function home() {
+  cur = null; modal.hidden = true;
+  const total = LEVELS.reduce((a, l) => a + (S.stars[l.id] || 0), 0);
+  const chStats = ch => { const ls = LEVELS.filter(l => l.ch === ch); return { done: ls.filter(l => S.stars[l.id]).length, n: ls.length }; };
+  const die = CHAPTERS.map(c => {
+    const live = c.n <= 2; const st = live ? chStats(c.n) : null;
+    return `<div class="blk ${live ? 'live' : ''}"><span class="bn">CH ${String(c.n).padStart(2, '0')}</span><span class="bt">${c.t}</span>
+      ${live ? `<div class="meter"><i style="width:${Math.round(st.done / st.n * 100)}%"></i></div><span class="bv">${st.done}/${st.n} levels</span>` : `<span class="bv">${c.v}</span>`}</div>`;
+  }).join('');
+  const chList = ch => {
+    const info = CHAPTERS[ch - 1];
+    const cards = LEVELS.map((l, i) => ({ l, i })).filter(o => o.l.ch === ch).map(({ l, i }) => {
+      const open = isOpen(i);
+      return `<button class="lvcard" data-act="level" data-id="${l.id}" ${open ? '' : 'disabled'}>
+        <span class="ln"><span>LEVEL ${i + 1}${l.kind === 'cmos' ? ' · TRANSISTORS' : l.kind === 'truth' ? ' · TABLE' : ''}</span><span class="stars">${open ? starStr(S.stars[l.id] || 0) : '🔒'}</span></span>
+        <span class="lt">${esc(l.title)}</span><span class="ls">${esc(l.sub)}</span></button>`;
+    }).join('');
+    return `<section class="chapter"><header><span class="eyebrow">Chapter ${ch}</span><h2 class="sec">${info.t}</h2><p>${info.d}</p></header><div class="levels">${cards}</div></section>`;
+  };
+  const parts = unlockedParts();
+  app.innerHTML = `<div class="home">
+    <header class="hero"><span class="eyebrow">CS310 · Version 1 of 4</span><h1>CPU Builder</h1>
+      <p class="lede">Start with transistors, end with a working CPU. Every part you build becomes a chip you reuse in the next level.</p>
+      <span class="score"><b>★ ${total}</b> of ${LEVELS.length * 3} stars · chips unlocked: ${parts.length ? parts.join(', ') : 'none yet'}</span></header>
+    <section class="chapter"><header><h2 class="sec">Your CPU floorplan</h2><p>Each block is one chapter. Version 1 lights up the first two.</p></header><div class="die">${die}</div></section>
+    ${chList(1)}${chList(2)}
+    <section class="chapter"><header><span class="eyebrow">Free build</span><h2 class="sec">Sandbox</h2><p>An open board with every chip you've unlocked, plus extra switches and lights. It writes the truth table for you.</p></header>
+      <div class="foot"><button class="btn primary" data-act="sandbox">Open sandbox</button><button class="btn small" data-act="reset">Reset progress</button></div></section>
+  </div>`;
+}
+
+/* =================== Level screen =================== */
+function openLevel(id) {
+  const lv = id === 'sandbox' ? { id: 'sandbox', kind: 'gate', sandbox: true, title: 'Sandbox', parts: unlockedParts(), inputs: [], outputs: [] } : LEVELS.find(l => l.id === id);
+  cur = { lv, hints: 0, sel: null, pending: null, undo: [], redo: [], msg: '', msgCls: '' };
+  if (lv.kind === 'gate') cur.circ = loadCirc(lv);
+  if (lv.kind === 'cmos') cur.cm = loadCmos(lv);
+  if (lv.kind === 'truth') cur.tt = { step: 0, mistakes: 0, wrong: [], cells: Array.from({ length: 8 }, () => [null, null, null, null]), bad: {} };
+  renderLevel(); window.scrollTo(0, 0);
+}
+function levelIndex() { return LEVELS.indexOf(cur.lv); }
+function renderLevel() {
+  const lv = cur.lv, i = levelIndex();
+  const top = `<div class="lvtop"><button class="btn" data-act="home">← Levels</button>
+    <div class="name"><span class="eyebrow">${lv.sandbox ? 'Free build' : `Chapter ${lv.ch} · Level ${i + 1}`}</span><h1>${esc(lv.title)}</h1></div>
+    ${lv.sandbox ? '' : `<span class="stars" id="lvstars">${starStr(S.stars[lv.id] || 0)}</span>`}</div>`;
+  let side = '';
+  if (lv.sandbox) {
+    side = `<div class="card goal"><p>Build anything with the chips you've unlocked. Add switches and lights from the toolbar. The table below updates as you build.</p></div>
+      <div class="card"><h3>Truth table</h3><div class="tt" id="ttable"></div></div>
+      <div class="card"><div class="cost" id="cost"></div></div>`;
+  } else {
+    side = `<div class="card goal"><p>${lv.goal}</p><div class="row"><button class="btn small" data-act="notes">📖 Notes</button>
+      <button class="btn small" data-act="hint" id="hintbtn">Hint</button></div><div id="hints" class="row" style="flex-direction:column;align-items:stretch"></div></div>
+      ${lv.kind !== 'truth' ? `<div class="card"><h3>Target</h3><div class="tt" id="ttable"></div>
+        <button class="btn primary" data-act="test">Test circuit</button><p class="msg" id="msg"></p></div>
+      <div class="card"><div class="cost" id="cost"></div></div>` : ''}`;
+  }
+  app.innerHTML = `${top}<div class="lv"><aside class="side">${side}</aside><main class="stage" id="stage"></main></div>`;
+  renderHints();
+  if (lv.kind === 'gate') { document.getElementById('stage').innerHTML = `<div class="toolbar" id="toolbar"></div><div class="boardwrap" id="board"></div>
+    <div class="legend"><span class="l1"><b>1</b></span><span class="l0"><b>0</b></span><span class="lz"><b>floating</b></span><span class="le"><b>conflict / error</b></span></div>
+    <p class="tip">Drag from a pin to another pin to wire them, or tap one pin then the other. Tap a switch to flip it. Select a part or wire, then Delete.</p>`;
+    setupBoard(); }
+  update();
+}
+function renderHints() {
+  const el = document.getElementById('hints'); if (!el) return;
+  const lv = cur.lv;
+  el.innerHTML = (lv.hints || []).slice(0, cur.hints).map((h, i) => `<p class="hint"><b>Hint ${i + 1}.</b> ${esc(h)}</p>`).join('');
+  const b = document.getElementById('hintbtn');
+  if (b) { const left = (lv.hints || []).length - cur.hints; b.textContent = left > 0 ? `Hint (${cur.hints + 1}/${lv.hints.length})` : 'No more hints'; b.disabled = left <= 0; }
+}
+function update() {
+  const lv = cur.lv;
+  if (lv.kind === 'gate') { renderToolbar(); renderBoard(); renderGateTable(); renderCost(circCost(cur.circ)); saveBoard(); }
+  else if (lv.kind === 'cmos') { renderCmos(); renderCmosTable(); renderCost(cur.cm.pu.ts.length + cur.cm.pd.ts.length); saveCmos(); }
+  else if (lv.kind === 'truth') renderTruth();
+  const m = document.getElementById('msg'); if (m) { m.className = 'msg ' + cur.msgCls; m.textContent = cur.msg; }
+}
+function renderCost(n) {
+  const el = document.getElementById('cost'); if (!el) return;
+  const lv = cur.lv;
+  el.innerHTML = `<div><h3 style="font-size:12px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;font-family:var(--font-body)">Transistors</h3>
+    <span class="big">${n}<small>CMOS</small></span></div>` + (lv.sandbox ? '' : `<ul><li>★ works</li><li>★★ ≤ ${lv.t2}</li><li>★★★ ≤ ${lv.t3}</li></ul>`);
+}
+
+/* ---------- Gate board ---------- */
+function snapState() { cur.undo.push(JSON.stringify(cur.circ)); if (cur.undo.length > 100) cur.undo.shift(); cur.redo = []; }
+function saveBoard() { S.boards[cur.lv.id] = cur.circ; persist(); }
+function renderToolbar() {
+  const lv = cur.lv, el = document.getElementById('toolbar'); if (!el) return;
+  const parts = lv.sandbox ? ['IN', 'OUT', ...unlockedParts()] : lv.parts;
+  el.innerHTML = parts.map(p => `<button class="btn part" data-act="add" data-part="${p}" title="Add ${p}">${partIcon(p)}<span>${p === 'IN' ? 'Switch' : p === 'OUT' ? 'Light' : p}</span>${GATES[p] ? `<span class="pc">${GATES[p].cost}T</span>` : ''}</button>`).join('')
+    + (parts.length ? '' : '<span class="tip">No parts on this level, just wires.</span>')
+    + `<span class="grow"></span><button class="btn small" data-act="undo" ${cur.undo.length ? '' : 'disabled'}>Undo</button>
+      <button class="btn small" data-act="redo" ${cur.redo.length ? '' : 'disabled'}>Redo</button>
+      <button class="btn small" data-act="del" ${cur.sel && !(cur.sel.t === 'c' && isFixed(cur.sel.id)) ? '' : 'disabled'}>Delete</button>
+      <button class="btn small" data-act="clear">Clear</button>`;
+}
+function isFixed(id) { const c = cur.circ.comps.find(c => c.id === id); return c && c.fixed; }
+function renderBoard() {
+  const svg = document.getElementById('bsvg'); if (!svg) return;
+  const circ = cur.circ, sim = simulate(circ);
+  const keyVal = k => sim.nv[sim.find(k)];
+  let wires = '';
+  circ.wires.forEach((w, i) => {
+    const a = pinPos(circ, w.a), b = pinPos(circ, w.b); if (!a || !b) return;
+    const d = wirePath(a, b), v = keyVal(w.a), sel = cur.sel && cur.sel.t === 'w' && cur.sel.i === i;
+    wires += `<path class="wire ${vcls(v)} ${sel ? 'sel' : ''} ${v === 1 ? 'glow' : ''}" d="${d}"/><path class="whit" data-wire="${i}" d="${d}"/>`;
+  });
+  let tmp = '';
+  if (drag && drag.type === 'wire' && drag.moved) { const a = pinPos(circ, drag.from); if (a) tmp = `<path class="tmp" d="${wirePath(a, { x: drag.x, y: drag.y })}"/>`; }
+  let comps = '';
+  for (const c of circ.comps) {
+    const sel = cur.sel && cur.sel.t === 'c' && cur.sel.id === c.id; const bb = bbox(c);
+    let body;
+    if (c.type === 'IN') { const v = c.v || 0; body = `<rect class="inbox ${v ? 'on' : ''}" x="0" y="0" width="44" height="32" rx="6"/><text class="inval" x="22" y="21">${v}</text><line class="st" x1="44" y1="16" x2="52" y2="16"/><text class="lbl" x="22" y="-8">${esc(c.label)}</text>`; }
+    else if (c.type === 'OUT') { const v = sim.outVal[c.id]; body = `<line class="st" x1="0" y1="16" x2="12" y2="16"/><circle class="lamp ${vcls(v)}" cx="26" cy="16" r="14"/><text class="lampv" x="26" y="20.5">${v === 1 ? 1 : v === 0 ? 0 : v === 'Z' ? '?' : '!'}</text><text class="lbl" x="26" y="-8">${esc(c.label)}</text>`; }
+    else body = shape(c.type);
+    const pins = pinsOf(c).map(p => { const k = c.id + ':' + p.id; return `<circle class="pin ${vcls(keyVal(k))} ${cur.pending === k ? 'pend' : ''}" cx="${p.x}" cy="${p.y}" r="${cur.pending === k ? 6 : 4}"/><circle class="hit" data-pin="${k}" cx="${p.x}" cy="${p.y}" r="13"/>`; }).join('');
+    comps += `<g class="comp" data-comp="${c.id}" transform="translate(${c.x},${c.y})">${sel ? `<rect class="selbox" x="-6" y="-6" width="${bb.w + 12}" height="${bb.h + 12}" rx="6"/>` : ''}${body}${pins}</g>`;
+  }
+  svg.querySelector('#gw').innerHTML = wires + tmp;
+  svg.querySelector('#gc').innerHTML = comps;
+}
+function setupBoard() {
+  const wrap = document.getElementById('board');
+  wrap.innerHTML = `<svg class="board" id="bsvg" viewBox="0 0 ${BW} ${BH}" role="img" aria-label="Circuit board">
+    <defs><pattern id="dotp" width="20" height="20" patternUnits="userSpaceOnUse"><circle class="dots" cx="10" cy="10" r="1.2"/></pattern></defs>
+    <rect width="${BW}" height="${BH}" fill="url(#dotp)"/><g id="gw"></g><g id="gc"></g></svg>`;
+  const svg = document.getElementById('bsvg');
+  const toSvg = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); };
+  const redraw = () => { if (rafPending) return; rafPending = true; requestAnimationFrame(() => { rafPending = false; renderBoard(); }); };
+  svg.addEventListener('pointerdown', e => {
+    const p = toSvg(e), t = e.target.closest('[data-pin],[data-comp],[data-wire]');
+    if (t && t.dataset.pin) {
+      const k = t.dataset.pin;
+      if (cur.pending && cur.pending !== k) { connect(cur.pending, k); cur.pending = null; update(); return; }
+      drag = { type: 'wire', from: k, x: p.x, y: p.y, sx: p.x, sy: p.y, moved: false };
+    } else if (t && t.dataset.comp) {
+      const c = cur.circ.comps.find(c => c.id === t.dataset.comp);
+      cur.sel = { t: 'c', id: c.id }; cur.pending = null;
+      drag = { type: 'comp', id: c.id, ox: p.x - c.x, oy: p.y - c.y, sx: p.x, sy: p.y, moved: false };
+      renderToolbar(); renderBoard();
+    } else if (t && t.dataset.wire) {
+      cur.sel = { t: 'w', i: +t.dataset.wire }; cur.pending = null; renderToolbar(); renderBoard(); return;
+    } else { cur.sel = null; cur.pending = null; renderToolbar(); renderBoard(); return; }
+    try { svg.setPointerCapture(e.pointerId); } catch (er) {}
+    e.preventDefault();
+  });
+  svg.addEventListener('pointermove', e => {
+    if (!drag) return; const p = toSvg(e);
+    if (!drag.moved && Math.hypot(p.x - drag.sx, p.y - drag.sy) > 5) { drag.moved = true; if (drag.type === 'comp') snapState(); }
+    if (!drag.moved) return;
+    if (drag.type === 'comp') {
+      const c = cur.circ.comps.find(c => c.id === drag.id), bb = bbox(c);
+      c.x = Math.max(4, Math.min(BW - bb.w - 4, Math.round((p.x - drag.ox) / 10) * 10));
+      c.y = Math.max(22, Math.min(BH - bb.h - 4, Math.round((p.y - drag.oy) / 10) * 10));
+    } else { drag.x = p.x; drag.y = p.y; }
+    redraw();
+  });
+  const end = e => {
+    if (!drag) return; const d = drag; drag = null;
+    if (d.type === 'comp') {
+      const c = cur.circ.comps.find(c => c.id === d.id);
+      if (!d.moved && c && c.type === 'IN') { snapState(); c.v = c.v ? 0 : 1; }
+      update(); return;
+    }
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const pin = el && el.closest && el.closest('[data-pin]');
+    if (pin && pin.dataset.pin !== d.from) { connect(d.from, pin.dataset.pin); cur.pending = null; }
+    else if (!d.moved) { cur.pending = cur.pending === d.from ? null : d.from; }
+    update();
+  };
+  svg.addEventListener('pointerup', end);
+  svg.addEventListener('pointercancel', () => { drag = null; renderBoard(); });
+}
+function connect(a, b) {
+  if (a === b) return;
+  if (a.split(':')[0] === b.split(':')[0]) { cur.msg = 'Connect pins on two different parts.'; cur.msgCls = 'bad'; return; }
+  if (cur.circ.wires.some(w => (w.a === a && w.b === b) || (w.a === b && w.b === a))) return;
+  // keep the output end first so the curve leaves outputs to the right
+  const pa = pinPos(cur.circ, a), pb = pinPos(cur.circ, b);
+  snapState();
+  cur.circ.wires.push(pb && pb.out && !(pa && pa.out) ? { a: b, b: a } : { a, b });
+  cur.msg = ''; cur.sel = null;
+}
+function addPart(type) {
+  const circ = cur.circ;
+  if (type === 'IN' && circ.comps.filter(c => c.type === 'IN').length >= 4) { cur.msg = 'The sandbox table supports up to 4 switches.'; cur.msgCls = 'bad'; update(); return; }
+  const c = { id: type.toLowerCase() + (circ.seq = (circ.seq || 1) + 1) + Math.random().toString(36).slice(2, 5), type, x: 0, y: 0 };
+  if (type === 'IN') { c.label = 'ABCD'.split('').find(l => !circ.comps.some(o => o.type === 'IN' && o.label === l)); c.v = 0; }
+  if (type === 'OUT') c.label = 'FGHJKL'.split('').find(l => !circ.comps.some(o => o.type === 'OUT' && o.label === l)) || 'Q';
+  const bb = bbox(c); let spot = null;
+  const xs = type === 'IN' ? [20] : type === 'OUT' ? [BW - 62] : [130, 230, 330, 430, 180, 280, 380];
+  outer: for (const x of xs) for (let y = 30; y <= BH - bb.h - 10; y += 30) {
+    if (!circ.comps.some(o => { const ob = bbox(o); return x < o.x + ob.w + 18 && x + bb.w + 18 > o.x && y < o.y + ob.h + 22 && y + bb.h + 22 > o.y; })) { spot = { x, y }; break outer; }
+  }
+  if (!spot) spot = { x: 260, y: 190 };
+  c.x = spot.x; c.y = spot.y;
+  snapState(); circ.comps.push(c); cur.sel = { t: 'c', id: c.id }; cur.msg = ''; update();
+}
+function delSel() {
+  if (!cur.sel) return; const circ = cur.circ;
+  if (cur.sel.t === 'w') { snapState(); circ.wires.splice(cur.sel.i, 1); }
+  else { if (isFixed(cur.sel.id)) return; snapState(); const id = cur.sel.id; circ.comps = circ.comps.filter(c => c.id !== id); circ.wires = circ.wires.filter(w => !w.a.startsWith(id + ':') && !w.b.startsWith(id + ':')); }
+  cur.sel = null; update();
+}
+function ioRows(lv) {
+  const ins = cur.circ.comps.filter(c => c.type === 'IN'), outs = cur.circ.comps.filter(c => c.type === 'OUT');
+  if (lv.sandbox) { ins.sort((a, b) => a.label.localeCompare(b.label)); outs.sort((a, b) => a.label.localeCompare(b.label)); }
+  else { ins.sort((a, b) => lv.inputs.indexOf(a.key) - lv.inputs.indexOf(b.key)); outs.sort((a, b) => lv.outputs.indexOf(a.key) - lv.outputs.indexOf(b.key)); }
+  return { ins, outs, rows: rowsFor(ins.length).map(r => {
+    const iv = {}; ins.forEach((c, j) => iv[c.id] = r[j]);
+    const sim = simulate(cur.circ, iv); const got = outs.map(o => sim.outVal[o.id]);
+    let want = null;
+    if (!lv.sandbox) { const kv = {}; ins.forEach((c, j) => kv[c.key] = r[j]); const f = lv.fn(kv); want = outs.map(o => f[o.key] ? 1 : 0); }
+    return { r, got, want, ok: want ? want.every((w, j) => w === got[j]) : true };
+  }) };
+}
+const showV = v => v === 1 ? '1' : v === 0 ? '0' : v === 'Z' ? '<span class="z">?</span>' : '<span class="e">!</span>';
+function renderGateTable() {
+  const el = document.getElementById('ttable'); if (!el) return;
+  const lv = cur.lv, { ins, outs, rows } = ioRows(lv);
+  if (!ins.length || !outs.length) { el.innerHTML = '<p class="tip">Add at least one switch and one light.</p>'; return; }
+  const curRow = ins.map(c => c.v || 0).join('');
+  let h = '<table><tr>' + ins.map(c => `<th>${esc(c.label)}</th>`).join('');
+  if (lv.sandbox) h += outs.map((o, j) => `<th class="${j ? '' : 'sep'}">${esc(o.label)}</th>`).join('');
+  else h += outs.map((o, j) => `<th class="${j ? '' : 'sep'}">${esc(o.label)} want</th><th>yours</th>`).join('') + '<th></th>';
+  h += '</tr>';
+  for (const row of rows) {
+    h += `<tr class="${row.r.join('') === curRow ? 'cur' : ''}">` + row.r.map(b => `<td>${b}</td>`).join('');
+    if (lv.sandbox) h += row.got.map((g, j) => `<td class="${j ? '' : 'sep'}">${showV(g)}</td>`).join('');
+    else h += outs.map((o, j) => `<td class="${j ? '' : 'sep'}">${row.want[j]}</td><td>${showV(row.got[j])}</td>`).join('') + `<td class="${row.ok ? 'y' : 'n'}">${row.ok ? '✓' : '✗'}</td>`;
+    h += '</tr>';
+  }
+  el.innerHTML = h + '</table>';
+}
+function testGate() {
+  const lv = cur.lv, { rows } = ioRows(lv);
+  const gates = cur.circ.comps.filter(c => GATES[c.type]).length;
+  const bad = rows.filter(r => !r.ok).length;
+  if (bad) {
+    const anyZ = rows.some(r => r.got.includes('Z')), anyE = rows.some(r => r.got.includes('E'));
+    cur.msg = `${bad} of ${rows.length} rows are wrong (marked ✗).` + (anyZ ? ' A light shows "?": nothing drives its wire.' : '') + (anyE ? ' A light shows "!": a wire has two drivers or a gate input is unconnected.' : '');
+    cur.msgCls = 'bad'; update(); return;
+  }
+  if (lv.requireGate && !gates) { cur.msg = 'Correct output, but a plain wire is not a buffer. Use gates.'; cur.msgCls = 'bad'; update(); return; }
+  finish(circCost(cur.circ));
+}
+function finish(count) {
+  const lv = cur.lv;
+  const stars = lv.kind === 'truth' ? count : (count <= lv.t3 ? 3 : count <= lv.t2 ? 2 : 1);
+  const prev = S.stars[lv.id] || 0, newUnlock = lv.unlock && !prev;
+  S.stars[lv.id] = Math.max(prev, stars); persist();
+  cur.msg = 'Passed!'; cur.msgCls = 'good'; update();
+  const ls = document.getElementById('lvstars'); if (ls) ls.innerHTML = starStr(S.stars[lv.id]);
+  const i = levelIndex(), next = LEVELS[i + 1];
+  const crit = lv.kind === 'truth'
+    ? `<ul><li>★★★ no mistakes</li><li>★★ one or two mistakes</li><li>Mistakes this time: ${cur.tt.mistakes}</li></ul>`
+    : `<p class="mono">Transistors: <b>${count}</b> · ★★ at ≤ ${lv.t2} · ★★★ at ≤ ${lv.t3}</p>${stars < 3 ? `<p>Can you get it to ${stars < 2 ? lv.t2 : lv.t3}?</p>` : ''}`;
+  openModal(`<span class="eyebrow">Level ${i + 1} complete</span><h2>${esc(lv.title)}</h2><span class="stars">${starStr(stars)}</span>${crit}
+    ${newUnlock ? `<p class="unlock">New chip unlocked: ${lv.unlock}</p>` : ''}
+    <div class="why"><b class="k">Why it works</b><p>${lv.why}</p></div>
+    <div class="row">${next ? `<button class="btn primary" data-act="level" data-id="${next.id}">Next: ${esc(next.title)}</button>` : `<button class="btn primary" data-act="home">Back to levels</button>`}
+    <button class="btn" data-act="close">Keep building</button></div>
+    ${next ? '' : '<p class="tip">That is all of Version 1. Chapter 3 (Simplify) comes next.</p>'}`);
+}
+
+/* ---------- CMOS board ---------- */
+function loadCmos(lv) {
+  const s = S.boards[lv.id];
+  if (s && s.pu) return s;
+  const base = lv.prefill ? JSON.parse(JSON.stringify(lv.prefill)) : { pu: { mode: 'series', ts: [] }, pd: { mode: 'series', ts: [] } };
+  base.vals = {}; lv.inputs.forEach(k => base.vals[k] = 0); return base;
+}
+function saveCmos() { S.boards[cur.lv.id] = cur.cm; persist(); }
+const tOn = (t, vals) => t.t === 'n' ? vals[t.in] === 1 : vals[t.in] === 0;
+function conducts(net, vals) { if (!net.ts.length) return false; return net.mode === 'series' ? net.ts.every(t => tOn(t, vals)) : net.ts.some(t => tOn(t, vals)); }
+function cmosOut(cm, vals) { const u = conducts(cm.pu, vals), d = conducts(cm.pd, vals); return u && d ? 'S' : u ? 1 : d ? 0 : 'Z'; }
+function swSvg(on, type) {
+  return `<svg viewBox="0 0 30 40"><circle class="term" cx="15" cy="4" r="3"/><circle class="term" cx="15" cy="36" r="3"/>
+    <line class="sw" x1="15" y1="36" x2="${on ? 15 : 27}" y2="${on ? 6 : 10}"/>${type === 'p' ? '<circle cx="6" cy="20" r="3.5" fill="none" stroke="currentColor" stroke-width="1.5"/>' : ''}</svg>`;
+}
+function renderCmos() {
+  const st = document.getElementById('stage'), cm = cur.cm, lv = cur.lv, vals = cm.vals;
+  const out = cmosOut(cm, vals), u = conducts(cm.pu, vals), d = conducts(cm.pd, vals);
+  const zone = (k, label, sub) => {
+    const net = cm[k], on = conducts(net, vals);
+    const ts = net.ts.map((t, i) => { const o = tOn(t, vals); return `<div class="tr ${o ? 'on' : ''}">${swSvg(o, t.t)}<span class="tk"><b>${t.t}-type</b>${o ? 'closed' : 'open'}</span>
+      <button class="tin" data-act="cm-in" data-net="${k}" data-i="${i}" title="Change input">${t.in}</button><button class="tx" data-act="cm-del" data-net="${k}" data-i="${i}" aria-label="Remove">×</button></div>`; }).join('');
+    const full = net.ts.length >= (lv.max || 3);
+    return `<div class="zone ${k} ${on ? 'on' : ''}"><div class="zh"><span><span class="zt">${label}</span><br><span class="zs">${sub} · ${net.ts.length ? (on ? 'conducting' : 'open') : 'empty'}</span></span>
+      <span class="seg"><button class="${net.mode === 'series' ? 'on' : ''}" data-act="cm-mode" data-net="${k}" data-mode="series">Series</button><button class="${net.mode === 'parallel' ? 'on' : ''}" data-act="cm-mode" data-net="${k}" data-mode="parallel">Parallel</button></span></div>
+      <div class="tnet ${net.mode}">${ts || '<span class="empty">No transistors yet</span>'}</div>
+      <div class="addrow"><button class="btn small" data-act="cm-add" data-net="${k}" data-t="p" ${full ? 'disabled' : ''}>+ p-type</button><button class="btn small" data-act="cm-add" data-net="${k}" data-t="n" ${full ? 'disabled' : ''}>+ n-type</button></div></div>`;
+  };
+  const ot = out === 1 ? 'Pull-up conducts: output connected to 1.' : out === 0 ? 'Pull-down conducts: output connected to 0.' : out === 'Z' ? 'Neither side conducts: the output is floating.' : 'Both sides conduct: power is shorted to ground!';
+  st.innerHTML = `<div class="boardwrap"><div class="cmos"><div class="stack">
+      <div class="rail vdd"><span>1 · POWER (VDD)</span><span>p-types pull up</span></div><div class="vlink ${u ? 'on' : ''}"></div>
+      ${zone('pu', 'Pull-up network', 'connects output to 1')}
+      <div class="vlink ${u ? 'on' : ''}"></div>
+      <div class="outnode"><div class="bulb ${out === 'S' ? 'vs' : vcls(out)}">${out === 'S' ? '⚡' : out === 'Z' ? '?' : out}</div><p class="ot"><b>Output.</b> ${ot}</p></div>
+      <div class="vlink"></div>
+      ${zone('pd', 'Pull-down network', 'connects output to 0')}
+      <div class="vlink"></div><div class="rail gnd"><span>0 · GROUND (GND)</span><span>n-types pull down</span></div>
+    </div><div class="inputs">${lv.inputs.map(k => `<button class="toggle ${vals[k] ? 'on' : ''}" data-act="cm-tog" data-in="${k}"><b>${k}</b><span>${vals[k]}</span></button>`).join('')}
+      <button class="btn small" data-act="cm-reset">Reset</button></div></div></div>
+    <p class="tip">Add transistors, pick series or parallel for each network, and tap a transistor's letter to change its input. Flip the inputs on the right to watch the switches.</p>`;
+}
+function renderCmosTable() {
+  const el = document.getElementById('ttable'); const lv = cur.lv, cm = cur.cm;
+  const curRow = lv.inputs.map(k => cm.vals[k]).join('');
+  const sv = v => v === 1 ? '1' : v === 0 ? '0' : v === 'Z' ? '<span class="z">float</span>' : '<span class="e">short</span>';
+  let h = '<table><tr>' + lv.inputs.map(k => `<th>${k}</th>`).join('') + '<th class="sep">want</th><th>yours</th><th></th></tr>';
+  for (const r of rowsFor(lv.inputs.length)) {
+    const v = {}; lv.inputs.forEach((k, j) => v[k] = r[j]);
+    const want = lv.fn(v), got = cmosOut(cm, v), ok = want === got;
+    h += `<tr class="${r.join('') === curRow ? 'cur' : ''}">${r.map(b => `<td>${b}</td>`).join('')}<td class="sep">${sv(want)}</td><td>${sv(got)}</td><td class="${ok ? 'y' : 'n'}">${ok ? '✓' : '✗'}</td></tr>`;
+  }
+  el.innerHTML = h + '</table>';
+}
+function testCmos() {
+  const lv = cur.lv, cm = cur.cm, rows = rowsFor(lv.inputs.length);
+  let bad = 0, shorts = 0;
+  for (const r of rows) { const v = {}; lv.inputs.forEach((k, j) => v[k] = r[j]); const g = cmosOut(cm, v); if (g === 'S') shorts++; if (g !== lv.fn(v)) bad++; }
+  if (bad) { cur.msg = `${bad} of ${rows.length} rows are wrong (marked ✗).` + (shorts ? ` ${shorts} row${shorts > 1 ? 's' : ''} short power to ground.` : ''); cur.msgCls = 'bad'; update(); return; }
+  finish(cm.pu.ts.length + cm.pd.ts.length);
+}
+
+/* ---------- Truth-table exercise ---------- */
+const TT_F = r => (r[0] | r[1] | r[2]) ? 0 : 1;
+function renderTruth() {
+  const st = document.getElementById('stage'), tt = cur.tt;
+  if (tt.step === 0) {
+    st.innerHTML = `<div class="boardwrap"><div class="ttx"><span class="eyebrow">Step 1 of 2</span><p class="q">A circuit has 3 inputs: A, B and C. How many rows does its truth table need?</p>
+      <div class="choices">${[3, 6, 8, 9].map(n => `<button class="btn ${tt.wrong.includes(n) ? 'wrong' : ''}" data-act="tt-rows" data-n="${n}">${n}</button>`).join('')}</div>
+      <p class="msg bad" id="ttmsg">${tt.wrong.length ? 'Not quite. Each input can be 0 or 1, and every combination needs its own row.' : ''}</p></div></div>`;
+    return;
+  }
+  const cell = (r, c) => { const v = tt.cells[r][c]; return `<button class="cell ${v === 1 ? 'v1' : ''} ${tt.bad[r + ',' + c] ? 'bad' : ''}" data-act="tt-cell" data-r="${r}" data-c="${c}" aria-label="Row ${r + 1} ${'ABCF'[c]}">${v === null ? '·' : v}</button>`; };
+  let rows = '';
+  for (let r = 0; r < 8; r++) rows += `<tr><td>${cell(r, 0)}</td><td>${cell(r, 1)}</td><td>${cell(r, 2)}</td><td class="sep">${cell(r, 3)}</td></tr>`;
+  st.innerHTML = `<div class="boardwrap"><div class="ttx"><span class="eyebrow">Step 2 of 2 · 2³ = 8 rows</span>
+    <p class="q">Fill A, B and C in counting order, then fill F for a 3-input NOR: <span class="mono">F = (A + B + C)'</span></p>
+    <p class="tip">Tap a cell to set it: · → 0 → 1 → 0. Mistakes this level: ${tt.mistakes}</p>
+    <div class="grid8"><table><tr><th>A</th><th>B</th><th>C</th><th class="sep">F</th></tr>${rows}</table></div>
+    <div class="row"><button class="btn primary" data-act="tt-check">Check table</button><p class="msg" id="ttmsg"></p></div></div></div>`;
+}
+function ttCheck() {
+  const tt = cur.tt, bad = {};
+  let blanks = 0, wrong = 0;
+  for (let r = 0; r < 8; r++) {
+    const want = [(r >> 2) & 1, (r >> 1) & 1, r & 1]; want.push(TT_F(want));
+    for (let c = 0; c < 4; c++) { const v = tt.cells[r][c]; if (v === null) blanks++; else if (v !== want[c]) { wrong++; bad[r + ',' + c] = 1; } }
+  }
+  tt.bad = bad;
+  if (blanks) { renderTruth(); const m = document.getElementById('ttmsg'); m.className = 'msg bad'; m.textContent = `${blanks} cell${blanks > 1 ? 's are' : ' is'} still empty.`; return; }
+  if (wrong) { tt.mistakes++; renderTruth(); const m = document.getElementById('ttmsg'); m.className = 'msg bad'; m.textContent = `${wrong} cell${wrong > 1 ? 's are' : ' is'} wrong (outlined in red).`; return; }
+  renderTruth(); finish(tt.mistakes === 0 ? 3 : tt.mistakes <= 2 ? 2 : 1);
+}
+
+/* =================== Modal & events =================== */
+function openModal(html) { modal.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${html}</div>`; modal.hidden = false; const b = modal.querySelector('.btn.primary, .btn'); if (b) b.focus(); }
+modal.addEventListener('click', e => { if (e.target === modal) modal.hidden = true; });
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  const a = b.dataset.act;
+  if (a === 'home') return home();
+  if (a === 'level') { modal.hidden = true; return openLevel(b.dataset.id); }
+  if (a === 'sandbox') return openLevel('sandbox');
+  if (a === 'close') { modal.hidden = true; return; }
+  if (a === 'reset') return openModal(`<h2>Reset progress?</h2><p>This clears every star and saved circuit in this browser.</p><div class="row"><button class="btn primary" data-act="reset-yes">Reset everything</button><button class="btn" data-act="close">Cancel</button></div>`);
+  if (a === 'reset-yes') { S = { stars: {}, boards: {} }; persist(); return home(); }
+  if (!cur) return;
+  const lv = cur.lv;
+  if (a === 'notes') return openModal(`<span class="eyebrow">From your CS310 sheet</span><h2>${esc(lv.title)}</h2>${lv.notes}<div class="row"><button class="btn primary" data-act="close">Back to the board</button></div>`);
+  if (a === 'hint') { cur.hints = Math.min((lv.hints || []).length, cur.hints + 1); return renderHints(); }
+  if (a === 'test') return lv.kind === 'cmos' ? testCmos() : testGate();
+  if (a === 'add') return addPart(b.dataset.part);
+  if (a === 'undo' && cur.undo.length) { cur.redo.push(JSON.stringify(cur.circ)); cur.circ = JSON.parse(cur.undo.pop()); cur.sel = null; return update(); }
+  if (a === 'redo' && cur.redo.length) { cur.undo.push(JSON.stringify(cur.circ)); cur.circ = JSON.parse(cur.redo.pop()); cur.sel = null; return update(); }
+  if (a === 'del') return delSel();
+  if (a === 'clear') { snapState(); const fixed = lv.sandbox ? [] : cur.circ.comps.filter(c => c.fixed); cur.circ = { comps: lv.sandbox ? loadCirc({ id: '__none', sandbox: true }).comps : fixed, wires: [], seq: cur.circ.seq }; cur.sel = null; cur.msg = ''; return update(); }
+  // CMOS
+  const cm = cur.cm;
+  if (a === 'cm-add') { cm[b.dataset.net].ts.push({ t: b.dataset.t, in: lv.inputs[0] }); cur.msg = ''; return update(); }
+  if (a === 'cm-del') { cm[b.dataset.net].ts.splice(+b.dataset.i, 1); return update(); }
+  if (a === 'cm-mode') { cm[b.dataset.net].mode = b.dataset.mode; return update(); }
+  if (a === 'cm-in') { const t = cm[b.dataset.net].ts[+b.dataset.i]; t.in = lv.inputs[(lv.inputs.indexOf(t.in) + 1) % lv.inputs.length]; return update(); }
+  if (a === 'cm-tog') { cm.vals[b.dataset.in] ^= 1; return update(); }
+  if (a === 'cm-reset') { delete S.boards[lv.id]; cur.cm = loadCmos(lv); cur.msg = ''; return update(); }
+  // truth
+  const tt = cur.tt;
+  if (a === 'tt-rows') { const n = +b.dataset.n; if (n === 8) tt.step = 1; else { tt.mistakes++; if (!tt.wrong.includes(n)) tt.wrong.push(n); } return renderTruth(); }
+  if (a === 'tt-cell') { const r = +b.dataset.r, c = +b.dataset.c, v = tt.cells[r][c]; tt.cells[r][c] = v === null ? 0 : 1 - v; delete tt.bad[r + ',' + c]; return renderTruth(); }
+  if (a === 'tt-check') return ttCheck();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !modal.hidden) { modal.hidden = true; return; }
+  if (!cur || cur.lv.kind !== 'gate' || !modal.hidden) return;
+  if (e.target.closest && e.target.closest('input,textarea')) return;
+  if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); delSel(); }
+  else if (e.key === 'Escape') { cur.pending = null; cur.sel = null; update(); }
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); document.querySelector(e.shiftKey ? '[data-act=redo]' : '[data-act=undo]')?.click(); }
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); document.querySelector('[data-act=redo]')?.click(); }
+});
+
+home();
+</script>
