@@ -640,7 +640,7 @@ function topnav(on) {
   return `<nav class="topnav"><span class="brand"><i></i>CPU Builder</span>
     <div class="navright"><div class="steps-nav">${b('welcome', 'About')}${b('map', 'Map')}${b('levels', 'Levels', `data-ch="${nextLevel().ch}"`)}</div>${themeBtn()}</div></nav>`;
 }
-function home() { S.seen ? showMap() : showWelcome(); }
+function home() { showWelcome(); }
 function leave() { cur = null; modal.hidden = true; window.scrollTo(0, 0); }
 
 function showWelcome() {
@@ -666,7 +666,7 @@ function showWelcome() {
     <section class="chapter"><header><h2 class="sec">From switch to CPU</h2><p class="sub">Every part is built out of the one before it.</p></header><div class="ladder">${ladder}</div></section>
     <section class="chapter"><header><h2 class="sec">How a level works</h2></header><div class="how">${how}</div></section>
     <section class="chapter"><header><h2 class="sec">What you’ll learn</h2><p class="sub">Topics from your CS310 course, each one used to build a real part.</p></header><div class="topics">${topics}</div></section>
-    <div class="row"><button class="btn primary big" data-act="map">See the map →</button></div>
+    <div class="row"><button class="btn primary big" data-act="map">See the map →</button>${stats().done ? `<button class="btn big" data-act="level" data-id="${nextLevel().id}">Continue: ${esc(nextLevel().title)}</button>` : ''}</div>
   </div>`;
 }
 
