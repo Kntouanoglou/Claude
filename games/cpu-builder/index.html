@@ -95,6 +95,9 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--hi); o
 .how .card b.n { font-family: var(--font-mono); color: var(--hi); font-size: 13px; }
 .how .card p.t { font-family: var(--font-display); font-weight: 600; font-size: 16px; }
 .how .card p.d { color: var(--muted); font-size: 14.5px; }
+.intro { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.intro p { font-size: 16.5px; line-height: 1.6; }
+.intro .goalcard { border-color: var(--hi); box-shadow: var(--glow); }
 .topics { display: flex; flex-wrap: wrap; gap: 8px; }
 .topics span { font-size: 13.5px; padding: 5px 12px; border-radius: 999px; background: var(--panel2); border: 1px solid var(--line); }
 
@@ -662,7 +665,11 @@ function showWelcome() {
     .map((t, i) => `<span>${t}</span>`).join('');
   app.innerHTML = `<div class="screen">${topnav('welcome')}
     <header class="hero"><span class="eyebrow">A CS310 learning game</span><h1>Build a CPU, <em>starting from a single switch.</em></h1>
-      <p class="lede">A CPU is the part of a computer that runs every program. Inside, it is made of billions of tiny switches called transistors. In this game you start with one switch and keep combining what you build into bigger parts, until you have a CPU that runs a program you wrote.</p></header>
+</header>
+    <div class="intro">
+      <div class="card"><span class="eyebrow">What is a CPU?</span><p>The CPU is the part of a computer that runs every program. Inside, it is made of billions of tiny on/off switches called <b>transistors</b>.</p></div>
+      <div class="card goalcard"><span class="eyebrow">Your goal in this game</span><p>Start with a single switch and keep combining what you build into bigger parts, until you have <b>a working CPU that runs a program you wrote</b>.</p></div>
+    </div>
     <section class="chapter"><header><h2 class="sec">From switch to CPU</h2><p class="sub">Every part is built out of the one before it.</p></header><div class="ladder">${ladder}</div></section>
     <section class="chapter"><header><h2 class="sec">How a level works</h2></header><div class="how">${how}</div></section>
     <section class="chapter"><header><h2 class="sec">What you’ll learn</h2><p class="sub">Topics from your CS310 course, each one used to build a real part.</p></header><div class="topics">${topics}</div></section>
