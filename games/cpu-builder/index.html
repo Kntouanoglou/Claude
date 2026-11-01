@@ -333,6 +333,9 @@ h2, .st-name, .lvcard .lt { font-weight: 700; }
 <div id="modal" class="overlay" hidden></div>
 
 <script>
+/* Language lets the browser hyphenate justified paragraphs instead of stretching spaces. */
+document.documentElement.lang = 'en';
+
 /* =================== Storage =================== */
 const STORE = 'cpu-builder-v1';
 function loadSave() {
