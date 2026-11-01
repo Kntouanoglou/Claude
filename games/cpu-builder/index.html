@@ -2,110 +2,160 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: home = chip floorplan + level lists; level = sidebar (goal, truth table, cost) beside a dotted circuit board; stacks on phones. */
+/* Layout: three menu screens (welcome, map timeline, chapter levels) and a level screen with a sidebar beside a grid circuit board; stacks on phones. Dark-first "lab console" look: deep navy, cyan signal glow. */
 :root {
-  --bg: #e7ebe6;
-  --panel: #f7f9f5;
-  --ink: #1a2320;
-  --muted: #586760;
-  --line: #c6cec7;
-  --board: #f2f5f0;
-  --dot: #c0c9c1;
-  --gate: #ffffff;
-  --hi: #c0621a;        /* signal 1: copper */
-  --hi-soft: #f6dcc4;
-  --lo: #8d9a92;        /* signal 0 */
-  --float: #2e6bd3;     /* floating wire */
-  --err: #cc3030;       /* conflict / error */
-  --ok: #23804a;
-  --font-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --bg: #080c16;
+  --panel: #0f1526;
+  --panel2: #151d33;
+  --ink: #e6ecf8;
+  --muted: #8a96b2;
+  --line: #222c47;
+  --board: #0b1120;
+  --dot: #18223b;
+  --gate: #121a2e;
+  --hi: #3fd8ff;        /* signal 1 + main accent: electric cyan */
+  --hi-soft: #0e2a3d;
+  --on-hi: #031119;
+  --lo: #4b5778;        /* signal 0 */
+  --float: #a38bff;     /* floating wire: violet, dashed */
+  --err: #ff5d7d;       /* conflict / error */
+  --ok: #3ee0a1;
+  --glow: 0 0 0 1px rgba(63, 216, 255, .35), 0 0 24px rgba(63, 216, 255, .18);
+  --font-display: "Sora", "Segoe UI", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0e1311; --panel: #161d1a; --ink: #e2e9e4; --muted: #92a299; --line: #2a3530;
-    --board: #111815; --dot: #26312c; --gate: #1c2521; --hi: #f39a4c; --hi-soft: #3d2614;
-    --lo: #56655d; --float: #6ea0ff; --err: #ff6a6a; --ok: #62cf8c; color-scheme: dark;
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3f6fc; --panel: #ffffff; --panel2: #eef2fa; --ink: #0d1426; --muted: #5a6683; --line: #d9e0ee;
+    --board: #f8fafe; --dot: #dce3f0; --gate: #ffffff; --hi: #0090c4; --hi-soft: #e1f3fb; --on-hi: #ffffff;
+    --lo: #9aa5bf; --float: #7350e6; --err: #e0325a; --ok: #0b9a68;
+    --glow: 0 0 0 1px rgba(0, 144, 196, .35), 0 6px 20px rgba(0, 144, 196, .12); color-scheme: light;
   }
 }
-:root[data-theme="dark"] {
-  --bg: #0e1311; --panel: #161d1a; --ink: #e2e9e4; --muted: #92a299; --line: #2a3530;
-  --board: #111815; --dot: #26312c; --gate: #1c2521; --hi: #f39a4c; --hi-soft: #3d2614;
-  --lo: #56655d; --float: #6ea0ff; --err: #ff6a6a; --ok: #62cf8c; color-scheme: dark;
+:root[data-theme="light"] {
+  --bg: #f3f6fc; --panel: #ffffff; --panel2: #eef2fa; --ink: #0d1426; --muted: #5a6683; --line: #d9e0ee;
+  --board: #f8fafe; --dot: #dce3f0; --gate: #ffffff; --hi: #0090c4; --hi-soft: #e1f3fb; --on-hi: #ffffff;
+  --lo: #9aa5bf; --float: #7350e6; --err: #e0325a; --ok: #0b9a68;
+  --glow: 0 0 0 1px rgba(0, 144, 196, .35), 0 6px 20px rgba(0, 144, 196, .12); color-scheme: light;
 }
 * { box-sizing: border-box; }
 body {
-  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15.5px; line-height: 1.5;
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15.5px; line-height: 1.55;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 20px 48px;
+  padding-block: 24px 56px;
 }
 #app { max-width: 1180px; margin: 0 auto; }
-h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; letter-spacing: .01em; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
 p { margin: 0; }
 code, .mono { font-family: var(--font-mono); font-size: .9em; }
-code { background: var(--board); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; white-space: nowrap; }
+code { background: var(--panel2); border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; white-space: nowrap; }
 button { font: inherit; color: inherit; cursor: pointer; }
 button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--hi); outline-offset: 2px; }
-.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--hi); }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--hi); }
 .btn {
-  border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 7px 12px;
-  display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500;
+  border: 1px solid var(--line); background: var(--panel2); border-radius: 10px; padding: 8px 14px;
+  display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; transition: border-color .15s, box-shadow .15s;
 }
-.btn:hover { border-color: var(--hi); }
-.btn.primary { background: var(--hi); border-color: var(--hi); color: #fff; font-weight: 600; }
-.btn.primary:hover { filter: brightness(1.07); }
+.btn:hover:not([disabled]) { border-color: var(--hi); }
+.btn.primary { background: var(--hi); border-color: var(--hi); color: var(--on-hi); font-weight: 600; }
+.btn.primary:hover:not([disabled]) { box-shadow: var(--glow); }
+.btn.big { padding: 12px 22px; font-size: 16px; border-radius: 12px; }
+.btn.ghost { background: transparent; }
 .btn[disabled] { opacity: .4; cursor: default; }
-.btn.small { padding: 4px 9px; font-size: 13px; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.card h3 { font-size: 15px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.btn.small { padding: 5px 10px; font-size: 13px; border-radius: 8px; }
+.link { background: none; border: 0; padding: 0; color: var(--hi); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-family: var(--font-mono); font-weight: 600; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .stars { font-size: 18px; letter-spacing: 2px; color: var(--hi); white-space: nowrap; }
 .stars .off { color: var(--line); }
 
-/* ---------- Home ---------- */
-.home { display: flex; flex-direction: column; gap: 28px; }
-.hero { display: flex; flex-direction: column; gap: 8px; }
-.hero h1 { font-size: clamp(36px, 7vw, 60px); line-height: 1; }
-.lede { color: var(--muted); max-width: 62ch; }
-.score { font-family: var(--font-mono); font-size: 14px; color: var(--muted); }
-.score b { color: var(--hi); }
-.sec { font-size: 20px; }
-.die {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 10px;
-  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+/* ---------- Menu screens ---------- */
+.screen { display: flex; flex-direction: column; gap: 28px; max-width: 860px; margin: 0 auto; }
+.topnav { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.brand { font-family: var(--font-display); font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+.brand i { width: 10px; height: 10px; border-radius: 3px; background: var(--hi); box-shadow: 0 0 10px var(--hi); }
+.steps-nav { display: flex; gap: 4px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.steps-nav button { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-family: var(--font-mono); font-size: 12.5px; }
+.steps-nav button:hover { color: var(--ink); }
+.steps-nav button.on { color: var(--hi); border-color: var(--hi); }
+.hero { display: flex; flex-direction: column; gap: 14px; }
+.hero h1 { font-size: clamp(34px, 6.4vw, 56px); line-height: 1.05; }
+.hero h1 em { font-style: normal; color: var(--hi); }
+.lede { color: var(--muted); max-width: 62ch; font-size: 17px; }
+.sec { font-size: 21px; }
+.sub { color: var(--muted); }
+
+/* Welcome: zoom ladder */
+.ladder { display: flex; align-items: stretch; gap: 0; overflow-x: auto; padding: 4px 2px 8px; }
+.rung { flex: 1 0 104px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; min-width: 0; }
+.rung .ic { width: 64px; height: 64px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); display: grid; place-items: center; }
+.rung .ic svg { width: 40px; height: 40px; }
+.rung .ic svg * { stroke: var(--hi); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.rung b { font-family: var(--font-display); font-size: 14px; }
+.rung span { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+.arrow { align-self: flex-start; margin-top: 24px; color: var(--muted); font-size: 18px; flex: none; }
+.how { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
+.how .card b.n { font-family: var(--font-mono); color: var(--hi); font-size: 13px; }
+.how .card p.t { font-family: var(--font-display); font-weight: 600; font-size: 16px; }
+.how .card p.d { color: var(--muted); font-size: 14.5px; }
+.topics { display: flex; flex-wrap: wrap; gap: 8px; }
+.topics span { font-size: 13.5px; padding: 5px 12px; border-radius: 999px; background: var(--panel2); border: 1px solid var(--line); }
+
+/* Map: vertical timeline */
+.progress { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
+.pbar { flex: 1 1 220px; height: 8px; background: var(--panel2); border-radius: 99px; overflow: hidden; border: 1px solid var(--line); }
+.pbar i { display: block; height: 100%; background: var(--hi); box-shadow: 0 0 12px var(--hi); }
+.ptext { font-family: var(--font-mono); font-size: 13.5px; color: var(--muted); }
+.ptext b { color: var(--ink); }
+.timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; position: relative; }
+.timeline::before { content: ""; position: absolute; left: 21px; top: 22px; bottom: 22px; width: 2px; background: var(--line); }
+.tl { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 14px; padding: 6px 0; position: relative; }
+.node { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 600; font-size: 15px; background: var(--bg); border: 2px solid var(--line); color: var(--muted); z-index: 1; }
+.tl.done .node { background: var(--hi); border-color: var(--hi); color: var(--on-hi); }
+.tl.here .node { border-color: var(--hi); color: var(--hi); box-shadow: var(--glow); }
+.step {
+  text-align: left; width: 100%; border: 1px solid var(--line); background: var(--panel); border-radius: 14px; padding: 12px 16px;
+  display: flex; flex-direction: column; gap: 4px; min-width: 0; transition: border-color .15s, box-shadow .15s;
 }
-.blk {
-  border: 1px solid var(--line); border-radius: 6px; padding: 10px; min-height: 84px; min-width: 0;
-  display: flex; flex-direction: column; justify-content: space-between; gap: 6px;
-  background: repeating-linear-gradient(135deg, transparent 0 6px, var(--board) 6px 12px);
-}
-.blk .bn { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
-.blk .bt { font-family: var(--font-display); font-weight: 600; font-size: 15px; line-height: 1.15; }
-.blk .bv { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
-.blk.live { background: var(--hi-soft); border-color: var(--hi); }
-.blk.live .bn, .blk.live .bv { color: var(--hi); }
-.meter { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
-.meter i { display: block; height: 100%; background: var(--hi); }
-@media (max-width: 640px) { .die { grid-template-columns: repeat(2, 1fr); } }
-.chapter { display: flex; flex-direction: column; gap: 12px; }
-.chapter header { display: flex; flex-direction: column; gap: 2px; }
+.step:hover { border-color: var(--hi); }
+.tl.here .step { border-color: var(--hi); box-shadow: var(--glow); }
+.tl.later .step { background: transparent; border-style: dashed; }
+.tl.later .step .st-name { color: var(--muted); }
+.step .st-top { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
+.step .st-name { font-family: var(--font-display); font-weight: 600; font-size: 17px; }
+.step .st-desc { color: var(--muted); font-size: 14.5px; }
+.chip { font-family: var(--font-mono); font-size: 11.5px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.here { color: var(--on-hi); background: var(--hi); border-color: var(--hi); }
+.chip.done { color: var(--ok); border-color: var(--ok); }
+
+/* Levels screen */
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.tab { border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 7px 14px; font-size: 14px; white-space: nowrap; }
+.tab.on { border-color: var(--hi); color: var(--hi); box-shadow: var(--glow); }
+.tab[disabled] { opacity: .45; cursor: default; }
+.chapter { display: flex; flex-direction: column; gap: 14px; }
+.chapter header { display: flex; flex-direction: column; gap: 4px; }
 .chapter header p { color: var(--muted); }
-.levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 10px; }
+.levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 10px; }
 .lvcard {
-  text-align: left; border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 12px 14px;
-  display: flex; flex-direction: column; gap: 4px; min-width: 0;
+  text-align: left; border: 1px solid var(--line); background: var(--panel); border-radius: 12px; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 4px; min-width: 0; transition: border-color .15s, box-shadow .15s;
 }
-.lvcard:hover:not([disabled]) { border-color: var(--hi); }
-.lvcard .ln { font-family: var(--font-mono); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.lvcard:hover:not([disabled]) { border-color: var(--hi); box-shadow: var(--glow); }
+.lvcard.next { border-color: var(--hi); }
+.lvcard .ln { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; letter-spacing: .04em; }
 .lvcard .lt { font-family: var(--font-display); font-weight: 600; font-size: 17px; }
 .lvcard .ls { font-size: 13.5px; color: var(--muted); }
-.lvcard[disabled] { opacity: .5; cursor: not-allowed; }
+.lvcard[disabled] { opacity: .45; cursor: not-allowed; }
 .lvcard .stars { font-size: 14px; }
-.foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 18px; }
+.foot p { color: var(--muted); font-size: 14px; max-width: 52ch; }
 
 /* ---------- Level ---------- */
 .lvtop { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -150,7 +200,7 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--hi); o
 
 /* board svg */
 .board .dots { fill: var(--dot); }
-.board .g { fill: var(--gate); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.board .g { fill: var(--gate); stroke: var(--ink); stroke-width: 1.8; stroke-linejoin: round; }
 .board .gl { fill: none; stroke: var(--ink); stroke-width: 2; }
 .board .st { stroke: var(--ink); stroke-width: 2; }
 .board .gt { font-family: var(--font-mono); font-size: 9px; fill: var(--muted); text-anchor: middle; pointer-events: none; }
@@ -158,14 +208,14 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--hi); o
 .board .inbox { fill: var(--gate); stroke: var(--ink); stroke-width: 2; }
 .board .inbox.on { fill: var(--hi); stroke: var(--hi); }
 .board .inval { font-family: var(--font-mono); font-weight: 600; font-size: 15px; text-anchor: middle; fill: var(--ink); pointer-events: none; }
-.board .inbox.on + .inval { fill: #fff; }
+.board .inbox.on + .inval { fill: var(--on-hi); }
 .board .lamp { stroke-width: 2; }
 .board .lamp.v1 { fill: var(--hi); stroke: var(--hi); }
 .board .lamp.v0 { fill: var(--gate); stroke: var(--lo); }
 .board .lamp.vz { fill: var(--gate); stroke: var(--float); stroke-dasharray: 4 3; }
 .board .lamp.ve { fill: var(--gate); stroke: var(--err); }
 .board .lampv { font-family: var(--font-mono); font-weight: 600; font-size: 13px; text-anchor: middle; fill: var(--muted); pointer-events: none; }
-.board .lamp.v1 + .lampv { fill: #fff; }
+.board .lamp.v1 + .lampv { fill: var(--on-hi); }
 .board .wire { fill: none; stroke-width: 3; stroke-linecap: round; }
 .board .wire.v1 { stroke: var(--hi); stroke-width: 4; }
 .board .wire.v0 { stroke: var(--lo); }
@@ -182,18 +232,20 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--hi); o
 .board .hit { fill: transparent; cursor: crosshair; }
 .board .comp { cursor: grab; }
 .board .selbox { fill: none; stroke: var(--hi); stroke-width: 1.5; stroke-dasharray: 4 3; }
-.board .glow { filter: drop-shadow(0 0 3px var(--hi)); }
+.board .glow { filter: drop-shadow(0 0 4px var(--hi)); }
+.board .lamp.v1 { filter: drop-shadow(0 0 8px var(--hi)); }
+.board .gridl { stroke: var(--dot); stroke-width: 1; }
 
 /* CMOS board */
 .cmos { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; padding: 16px; align-items: stretch; }
 @media (max-width: 520px) { .cmos { grid-template-columns: minmax(0, 1fr); } }
 .stack { display: flex; flex-direction: column; gap: 0; min-width: 0; }
 .rail { font-family: var(--font-mono); font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 6px; display: flex; justify-content: space-between; gap: 8px; }
-.rail.vdd { background: var(--hi); color: #fff; }
-.rail.gnd { background: var(--lo); color: #fff; }
+.rail.vdd { background: var(--hi); color: var(--on-hi); }
+.rail.gnd { background: var(--panel2); color: var(--ink); border: 1px solid var(--line); }
 .zone { border: 2px solid var(--line); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 10px; background: var(--panel); position: relative; }
 .zone.on.pu { border-color: var(--hi); }
-.zone.on.pd { border-color: var(--lo); background: var(--board); }
+.zone.on.pd { border-color: var(--muted); background: var(--board); }
 .zone .zh { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center; }
 .zone .zt { font-family: var(--font-display); font-weight: 600; font-size: 15px; }
 .zone .zs { font-size: 12.5px; color: var(--muted); }
@@ -221,7 +273,7 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--hi); o
 .outnode { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 0; }
 .outnode .wire { width: 2px; align-self: stretch; }
 .bulb { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 700; font-size: 18px; border: 3px solid var(--lo); background: var(--gate); }
-.bulb.v1 { background: var(--hi); border-color: var(--hi); color: #fff; box-shadow: 0 0 18px var(--hi); }
+.bulb.v1 { background: var(--hi); border-color: var(--hi); color: var(--on-hi); box-shadow: 0 0 18px var(--hi); }
 .bulb.v0 { border-color: var(--lo); color: var(--muted); }
 .bulb.vz { border-color: var(--float); border-style: dashed; color: var(--float); }
 .bulb.vs { border-color: var(--err); color: var(--err); background: var(--panel); animation: buzz .25s infinite alternate; }
@@ -233,7 +285,7 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--hi); o
 .toggle { border: 2px solid var(--ink); background: var(--gate); border-radius: 10px; width: 64px; height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--font-mono); }
 .toggle b { font-family: var(--font-display); font-size: 13px; }
 .toggle span { font-size: 20px; font-weight: 700; }
-.toggle.on { background: var(--hi); border-color: var(--hi); color: #fff; }
+.toggle.on { background: var(--hi); border-color: var(--hi); color: var(--on-hi); }
 .addrow { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
 
 /* Truth-table exercise */
@@ -248,10 +300,11 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--hi); o
 .grid8 th.sep { padding-left: 18px; }
 .grid8 td.sep { padding-left: 14px; }
 .cell { width: 46px; height: 38px; border: 1.5px solid var(--line); border-radius: 7px; background: var(--gate); font-family: var(--font-mono); font-size: 17px; font-weight: 600; }
-.cell.v1 { background: var(--hi); border-color: var(--hi); color: #fff; }
+.cell.v1 { background: var(--hi); border-color: var(--hi); color: var(--on-hi); }
 .cell.bad { border-color: var(--err); box-shadow: 0 0 0 2px var(--err); }
 
 /* Modal */
+.sheet .why p { color: var(--ink); }
 .overlay { position: fixed; inset: 0; background: rgba(10, 16, 13, .5); display: grid; place-items: center; padding: 16px; z-index: 50; }
 .overlay[hidden] { display: none; }
 .sheet { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; max-width: 560px; width: 100%; max-height: 86vh; overflow: auto; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
@@ -285,8 +338,8 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 
 /* =================== Gates =================== */
 const GATES = {
-  NOT:  { n: 1, w: 50, cost: 2,  f: a => !a[0] },
-  BUF:  { n: 1, w: 50, cost: 4,  f: a => !!a[0] },
+  NOT:  { n: 1, w: 58, cost: 2,  f: a => !a[0] },
+  BUF:  { n: 1, w: 58, cost: 4,  f: a => !!a[0] },
   NAND: { n: 2, w: 60, cost: 4,  f: a => !(a[0] && a[1]) },
   NOR:  { n: 2, w: 60, cost: 4,  f: a => !(a[0] || a[1]) },
   AND:  { n: 2, w: 60, cost: 6,  f: a => !!(a[0] && a[1]) },
@@ -305,8 +358,8 @@ function shape(t) {
     case 'NOR':  return st2 + `<path class="g" d="M6,2 Q30,2 46,20 Q30,38 6,38 Q17,20 6,2 Z"/>${bub(50)}<line class="st" x1="54" y1="20" x2="60" y2="20"/>` + lab(25);
     case 'XOR':  return st2 + `<path class="g" d="M12,2 Q34,2 50,20 Q34,38 12,38 Q23,20 12,2 Z"/><path class="gl" d="M5,2 Q16,20 5,38"/><line class="st" x1="50" y1="20" x2="60" y2="20"/>` + lab(30);
     case 'XNOR': return st2 + `<path class="g" d="M12,2 Q32,2 46,20 Q32,38 12,38 Q23,20 12,2 Z"/><path class="gl" d="M5,2 Q16,20 5,38"/>${bub(50)}<line class="st" x1="54" y1="20" x2="60" y2="20"/>` + `<text class="gt" x="28" y="23" style="font-size:8px">XNOR</text>`;
-    case 'NOT':  return `<line class="st" x1="0" y1="20" x2="6" y2="20"/><path class="g" d="M6,4 L38,20 L6,36 Z"/>${bub(42)}<line class="st" x1="46" y1="20" x2="50" y2="20"/>`;
-    case 'BUF':  return `<line class="st" x1="0" y1="20" x2="6" y2="20"/><path class="g" d="M6,4 L42,20 L6,36 Z"/><line class="st" x1="42" y1="20" x2="50" y2="20"/>`;
+    case 'NOT':  return `<line class="st" x1="0" y1="20" x2="6" y2="20"/><path class="g" d="M6,4 L38,20 L6,36 Z"/>${bub(42)}<line class="st" x1="46" y1="20" x2="58" y2="20"/>`;
+    case 'BUF':  return `<line class="st" x1="0" y1="20" x2="6" y2="20"/><path class="g" d="M6,4 L42,20 L6,36 Z"/><line class="st" x1="42" y1="20" x2="58" y2="20"/>`;
   }
   return '';
 }
@@ -395,7 +448,7 @@ const LEVELS = [
     goal: 'Build AND: F = A·B. Three stars for matching the real CMOS cost.',
     notes: NOTES.count + `<p>AND is a <b>derived</b> gate: CMOS can't build it in one stage, because single gates always invert.</p>`,
     why: 'AND = NAND followed by NOT: ((A·B)\')\' = A·B. That is 4 + 2 = 6 transistors, the "inputs × 2 + 2" rule. A NAND used as a NOT costs 8.',
-    hints: ['NAND gives the opposite of what you want.', 'Invert the NAND output.', 'NAND(A, B) → NOT → F. Use the NOT chip for 3 stars.'] },
+    hints: ['NAND gives the opposite of what you want.', 'Invert the NAND output.', 'NAND(A, B) → NOT → F. Use the NOT part for 3 stars.'] },
 
   { id: 'or', ch: 2, kind: 'gate', title: 'OR from NAND', sub: 'De Morgan in hardware', unlock: 'OR',
     inputs: ['A', 'B'], outputs: ['F'], parts: ['NAND', 'NOT'], fn: v => ({ F: v.A | v.B }), t2: 12, t3: 8,
@@ -444,17 +497,21 @@ const LEVELS = [
   { id: 'xnor', ch: 2, kind: 'gate', title: 'XNOR', sub: 'Cheapest wins', unlock: 'XNOR',
     inputs: ['A', 'B'], outputs: ['F'], parts: ['NAND', 'NOR', 'NOT', 'XOR'], fn: v => ({ F: 1 - (v.A ^ v.B) }), t2: 18, t3: 16,
     goal: 'Build XNOR: F = 1 when A and B are the same. Any parts you like. Can you beat XOR + NOT?',
-    notes: `<p>XNOR is the opposite of XOR: <code>(A ⊕ B)'</code>. Your XOR chip counts as 16 transistors (4 NANDs).</p>` + NOTES.count,
+    notes: `<p>XNOR is the opposite of XOR: <code>(A ⊕ B)'</code>. Your XOR part counts as 16 transistors (4 NANDs).</p>` + NOTES.count,
     why: 'XOR + NOT = 18. Four NORs in the same shape as the NAND XOR give XNOR directly: N = NOR(A, B), then NOR(A, N), NOR(B, N), and a final NOR. 16 transistors. NAND and NOR are mirror images, and so are their circuits.',
     hints: ['XOR followed by NOT works: 18 transistors, two stars.', 'Your NAND XOR used 4 gates. Try the same wiring with a different gate.', 'N = NOR(A, B); NOR(A, N); NOR(B, N); final NOR of those two.'] },
 ];
 const CHAPTERS = [
-  { n: 1, t: 'Switches', v: 'Version 1', d: 'Transistors and CMOS gates' },
-  { n: 2, t: 'Gates', v: 'Version 1', d: 'NAND, NOR and the universal gates' },
-  { n: 3, t: 'Simplify', v: 'Version 2' }, { n: 4, t: 'Arithmetic', v: 'Version 2' },
-  { n: 5, t: 'Negatives', v: 'Version 2' }, { n: 6, t: 'Choosing', v: 'Version 3' },
-  { n: 7, t: 'The ALU', v: 'Version 3' }, { n: 8, t: 'Memory', v: 'Version 3' },
-  { n: 9, t: 'The CPU', v: 'Version 4' }, { n: 10, t: 'Run it', v: 'Version 4' },
+  { n: 1, live: 1, t: 'Switches', v: 'Version 1', d: 'A transistor is an on/off switch controlled by electricity. Build NOT, NAND and NOR out of them.' },
+  { n: 2, live: 1, t: 'Gates', v: 'Version 1', d: 'Combine your gates into all the others: AND, OR, XOR and more, using only NAND or NOR.' },
+  { n: 3, t: 'Simplify', v: 'Version 2', d: 'Do the same job with fewer gates, so circuits get smaller and faster.', build: 'A K-map tool, then circuits from truth tables using as few transistors as possible.', course: 'SOP / POS, K-maps, don’t cares, Boolean algebra.' },
+  { n: 4, t: 'Arithmetic', v: 'Version 2', d: 'Gates that add binary numbers.', build: 'Half adder, then full adder, then a 4-bit adder.', course: 'Binary addition and carries.' },
+  { n: 5, t: 'Negatives', v: 'Version 2', d: 'Handle negative numbers and subtraction.', build: 'A negator, a subtractor and an overflow detector.', course: 'Two’s complement.' },
+  { n: 6, t: 'Choosing', v: 'Version 3', d: 'Parts that pick one signal out of many.', build: 'A multiplexer and a decoder.', course: 'Building blocks between gates and functional units.' },
+  { n: 7, t: 'The ALU', v: 'Version 3', d: 'The CPU’s calculator: it adds, subtracts, ANDs or ORs, depending on control bits.', build: 'A 4-bit ALU from your adders and gates.', course: 'The ALU.' },
+  { n: 8, t: 'Memory', v: 'Version 3', d: 'Parts that remember values from one clock tick to the next.', build: 'Latch, flip-flop, register, then a small RAM.', course: 'Sequential logic and the clock.' },
+  { n: 9, t: 'The CPU', v: 'Version 4', d: 'Connect everything so it can fetch instructions and follow them.', build: 'Program counter, instruction decoder and control unit, wired to your ALU and registers.', course: 'Fetch, decode, execute.' },
+  { n: 10, t: 'Run it', v: 'Version 4', d: 'Write a small program and watch your CPU run it, step by step.', build: 'Programs in a simple assembly language, turned into machine code.', course: 'Machine code and instructions.' },
 ];
 const PART_ORDER = ['NOT', 'NAND', 'NOR', 'AND', 'OR', 'BUF', 'XOR', 'XNOR'];
 function unlockedParts() {
@@ -540,36 +597,110 @@ const vcls = v => v === 1 ? 'v1' : v === 0 ? 'v0' : v === 'Z' ? 'vz' : 've';
 let cur = null;      // active level session
 let drag = null, rafPending = false;
 
-/* =================== Home =================== */
-function home() {
-  cur = null; modal.hidden = true;
-  const total = LEVELS.reduce((a, l) => a + (S.stars[l.id] || 0), 0);
-  const chStats = ch => { const ls = LEVELS.filter(l => l.ch === ch); return { done: ls.filter(l => S.stars[l.id]).length, n: ls.length }; };
-  const die = CHAPTERS.map(c => {
-    const live = c.n <= 2; const st = live ? chStats(c.n) : null;
-    return `<div class="blk ${live ? 'live' : ''}"><span class="bn">CH ${String(c.n).padStart(2, '0')}</span><span class="bt">${c.t}</span>
-      ${live ? `<div class="meter"><i style="width:${Math.round(st.done / st.n * 100)}%"></i></div><span class="bv">${st.done}/${st.n} levels</span>` : `<span class="bv">${c.v}</span>`}</div>`;
-  }).join('');
-  const chList = ch => {
-    const info = CHAPTERS[ch - 1];
-    const cards = LEVELS.map((l, i) => ({ l, i })).filter(o => o.l.ch === ch).map(({ l, i }) => {
-      const open = isOpen(i);
-      return `<button class="lvcard" data-act="level" data-id="${l.id}" ${open ? '' : 'disabled'}>
-        <span class="ln"><span>LEVEL ${i + 1}${l.kind === 'cmos' ? ' · TRANSISTORS' : l.kind === 'truth' ? ' · TABLE' : ''}</span><span class="stars">${open ? starStr(S.stars[l.id] || 0) : '🔒'}</span></span>
-        <span class="lt">${esc(l.title)}</span><span class="ls">${esc(l.sub)}</span></button>`;
-    }).join('');
-    return `<section class="chapter"><header><span class="eyebrow">Chapter ${ch}</span><h2 class="sec">${info.t}</h2><p>${info.d}</p></header><div class="levels">${cards}</div></section>`;
-  };
-  const parts = unlockedParts();
-  app.innerHTML = `<div class="home">
-    <header class="hero"><span class="eyebrow">CS310 · Version 1 of 4</span><h1>CPU Builder</h1>
-      <p class="lede">Start with transistors, end with a working CPU. Every part you build becomes a chip you reuse in the next level.</p>
-      <span class="score"><b>★ ${total}</b> of ${LEVELS.length * 3} stars · chips unlocked: ${parts.length ? parts.join(', ') : 'none yet'}</span></header>
-    <section class="chapter"><header><h2 class="sec">Your CPU floorplan</h2><p>Each block is one chapter. Version 1 lights up the first two.</p></header><div class="die">${die}</div></section>
-    ${chList(1)}${chList(2)}
-    <section class="chapter"><header><span class="eyebrow">Free build</span><h2 class="sec">Sandbox</h2><p>An open board with every chip you've unlocked, plus extra switches and lights. It writes the truth table for you.</p></header>
-      <div class="foot"><button class="btn primary" data-act="sandbox">Open sandbox</button><button class="btn small" data-act="reset">Reset progress</button></div></section>
+/* =================== Menu screens =================== */
+const ICONS = {
+  transistor: '<path d="M6 20h10M16 10v20M21 8v24M21 13h11V4M21 27h11v9"/>',
+  gate: '<path d="M8 8h12a12 12 0 0 1 0 24H8zM2 14h6M2 26h6M32 20h6"/>',
+  adder: '<rect x="6" y="6" width="28" height="28" rx="5"/><path d="M20 13v14M13 20h14"/>',
+  alu: '<path d="M4 6h12l4 7 4-7h12l-8 28H12z"/>',
+  cpu: '<rect x="10" y="10" width="20" height="20" rx="3"/><path d="M15 4v6M20 4v6M25 4v6M15 30v6M20 30v6M25 30v6M4 15h6M4 20h6M4 25h6M30 15h6M30 20h6M30 25h6"/>',
+};
+function stats() {
+  return { done: LEVELS.filter(l => S.stars[l.id]).length, stars: LEVELS.reduce((a, l) => a + (S.stars[l.id] || 0), 0), n: LEVELS.length };
+}
+function nextLevel() { const l = LEVELS.find(l => !S.stars[l.id]); return l || LEVELS[LEVELS.length - 1]; }
+function chStats(n) { const ls = LEVELS.filter(l => l.ch === n); return { done: ls.filter(l => S.stars[l.id]).length, n: ls.length, stars: ls.reduce((a, l) => a + (S.stars[l.id] || 0), 0) }; }
+function chStatus(c) {
+  if (!c.live) return 'later';
+  const st = chStats(c.n);
+  if (st.done === st.n) return 'done';
+  return nextLevel().ch === c.n ? 'here' : 'next';
+}
+function topnav(on) {
+  const b = (k, label, extra = '') => `<button class="${on === k ? 'on' : ''}" data-act="${k}" ${extra}>${label}</button>`;
+  return `<nav class="topnav"><span class="brand"><i></i>CPU Builder</span>
+    <div class="steps-nav">${b('welcome', 'About')}${b('map', 'Map')}${b('levels', 'Levels', `data-ch="${nextLevel().ch}"`)}</div></nav>`;
+}
+function home() { S.seen ? showMap() : showWelcome(); }
+function leave() { cur = null; modal.hidden = true; window.scrollTo(0, 0); }
+
+function showWelcome() {
+  leave(); S.seen = 1; persist();
+  const rungs = [
+    ['transistor', 'Transistor', 'an on/off switch'],
+    ['gate', 'Logic gate', 'a few switches that make a decision'],
+    ['adder', 'Adder', 'gates that add binary numbers'],
+    ['alu', 'ALU', 'the CPU’s calculator'],
+    ['cpu', 'CPU', 'runs your program'],
+  ];
+  const ladder = rungs.map(([ic, t, d], i) => `${i ? '<span class="arrow" aria-hidden="true">→</span>' : ''}<div class="rung"><div class="ic"><svg viewBox="0 0 40 40" aria-hidden="true">${ICONS[ic]}</svg></div><b>${t}</b><span>${d}</span></div>`).join('');
+  const how = [
+    ['Get a goal', 'Each level asks for one part, like a NAND gate, and shows the truth table it has to match.'],
+    ['Build it', 'Place transistors or gates on a board and wire them up. Wires light up as signals flow through.'],
+    ['Test and reuse', 'The game checks every input. Pass, and the part joins your toolbox for later levels. Fewer transistors earn more stars.'],
+  ].map(([t, d], i) => `<div class="card"><b class="n">0${i + 1}</b><p class="t">${t}</p><p class="d">${d}</p></div>`).join('');
+  const topics = ['CMOS transistors', 'Logic gates', 'Universal gates (NAND / NOR)', 'Truth tables', 'Boolean algebra and De Morgan', 'SOP / POS', 'K-maps', 'Binary addition', 'Two’s complement', 'The ALU', 'Registers and memory', 'Fetch, decode, execute']
+    .map((t, i) => `<span>${t}</span>`).join('');
+  app.innerHTML = `<div class="screen">${topnav('welcome')}
+    <header class="hero"><span class="eyebrow">A CS310 learning game</span><h1>Build a CPU, <em>starting from a single switch.</em></h1>
+      <p class="lede">A CPU is the part of a computer that runs every program. Inside, it is made of billions of tiny switches called transistors. In this game you start with one switch and keep combining what you build into bigger parts, until you have a CPU that runs a program you wrote.</p></header>
+    <section class="chapter"><header><h2 class="sec">From switch to CPU</h2><p class="sub">Every part is built out of the one before it.</p></header><div class="ladder">${ladder}</div></section>
+    <section class="chapter"><header><h2 class="sec">How a level works</h2></header><div class="how">${how}</div></section>
+    <section class="chapter"><header><h2 class="sec">What you’ll learn</h2><p class="sub">Topics from your CS310 course, each one used to build a real part.</p></header><div class="topics">${topics}</div></section>
+    <div class="row"><button class="btn primary big" data-act="map">See the map →</button></div>
   </div>`;
+}
+
+function showMap() {
+  leave();
+  const st = stats(), nx = nextLevel(), parts = unlockedParts();
+  const chipFor = (s, c) => s === 'done' ? '<span class="chip done">✓ Done</span>' : s === 'here' ? '<span class="chip here">▶ You are here</span>' : s === 'next' ? '<span class="chip">Next up</span>' : `<span class="chip">🔒 ${c.v}</span>`;
+  const steps = CHAPTERS.map(c => {
+    const s = chStatus(c), cs = c.live ? chStats(c.n) : null;
+    return `<li class="tl ${s}"><span class="node">${s === 'done' ? '✓' : c.n}</span>
+      <button class="step" data-act="${c.live ? 'levels' : 'preview'}" data-ch="${c.n}">
+        <span class="st-top"><span class="st-name">${c.t}</span>${chipFor(s, c)}</span>
+        <span class="st-desc">${c.d}</span>
+        ${cs ? `<span class="ptext">${cs.done} of ${cs.n} levels · ★ ${cs.stars}</span>` : ''}</button></li>`;
+  }).join('');
+  app.innerHTML = `<div class="screen">${topnav('map')}
+    <header class="hero"><span class="eyebrow">The map</span><h1>Your path to a CPU</h1>
+      <p class="lede">10 steps, from a single switch to a computer that runs your code. Each step uses what you built in the step before. Click a step to open it.</p></header>
+    <div class="card"><div class="progress"><span class="ptext"><b>${st.done} of ${st.n}</b> levels done · <b>${st.stars}</b> stars</span>
+      <div class="pbar"><i style="width:${Math.round(st.done / st.n * 100)}%"></i></div>
+      <button class="btn primary" data-act="level" data-id="${nx.id}">${st.done ? 'Continue' : 'Start'}: ${esc(nx.title)} →</button></div></div>
+    <ol class="timeline">${steps}</ol>
+    <div class="foot"><p><b>Parts you can use:</b> ${parts.length ? parts.join(', ') : 'none yet. Finish NOT, NAND and NOR in step 1 to get your first parts.'}</p>
+      <button class="link" data-act="welcome">About this game</button></div>
+  </div>`;
+}
+
+function showLevels(ch) {
+  leave();
+  const c = CHAPTERS[ch - 1], nx = nextLevel();
+  const tabs = CHAPTERS.map(o => `<button class="tab ${o.n === ch ? 'on' : ''}" data-act="${o.live ? 'levels' : 'preview'}" data-ch="${o.n}">${o.n}. ${o.t}${o.live ? '' : ' 🔒'}</button>`).join('');
+  const cards = LEVELS.map((l, i) => ({ l, i })).filter(o => o.l.ch === ch).map(({ l, i }) => {
+    const open = isOpen(i);
+    return `<button class="lvcard ${l === nx && !S.stars[l.id] ? 'next' : ''}" data-act="level" data-id="${l.id}" ${open ? '' : 'disabled'}>
+      <span class="ln"><span>LEVEL ${i + 1}${l.kind === 'cmos' ? ' · TRANSISTORS' : l.kind === 'truth' ? ' · TABLE' : l.parts.length ? ' · GATES' : ' · WIRING'}</span><span class="stars">${open ? starStr(S.stars[l.id] || 0) : '🔒'}</span></span>
+      <span class="lt">${esc(l.title)}</span><span class="ls">${esc(l.sub)}</span></button>`;
+  }).join('');
+  const cs = chStats(ch);
+  app.innerHTML = `<div class="screen">${topnav('levels')}
+    <div class="tabs" role="tablist">${tabs}</div>
+    <header class="hero"><span class="eyebrow">Step ${ch} of 10 · ${cs.done} of ${cs.n} levels done</span><h1>${c.t}</h1><p class="lede">${c.d}</p></header>
+    <div class="levels">${cards}</div>
+    <div class="foot"><p><b>Sandbox:</b> an open board with every part you’ve unlocked. It writes the truth table for you.</p>
+      <div class="row"><button class="btn" data-act="sandbox">Open sandbox</button><button class="btn small ghost" data-act="reset">Reset progress</button></div></div>
+  </div>`;
+}
+
+function showPreview(n) {
+  const c = CHAPTERS[n - 1];
+  openModal(`<span class="eyebrow">Step ${c.n} of 10 · coming in ${c.v}</span><h2>${c.t}</h2><p>${c.d}</p>
+    <div class="why"><b class="k">You will build</b><p>${c.build}</p></div>
+    <div class="why"><b class="k">From your course</b><p>${c.course}</p></div>
+    <div class="row"><button class="btn primary" data-act="close">Got it</button></div>`);
 }
 
 /* =================== Level screen =================== */
@@ -584,12 +715,12 @@ function openLevel(id) {
 function levelIndex() { return LEVELS.indexOf(cur.lv); }
 function renderLevel() {
   const lv = cur.lv, i = levelIndex();
-  const top = `<div class="lvtop"><button class="btn" data-act="home">← Levels</button>
-    <div class="name"><span class="eyebrow">${lv.sandbox ? 'Free build' : `Chapter ${lv.ch} · Level ${i + 1}`}</span><h1>${esc(lv.title)}</h1></div>
+  const top = `<div class="lvtop"><button class="btn" data-act="levels" data-ch="${lv.ch || 1}">← Levels</button>
+    <div class="name"><span class="eyebrow">${lv.sandbox ? 'Free build' : `Step ${lv.ch} · Level ${i + 1}`}</span><h1>${esc(lv.title)}</h1></div>
     ${lv.sandbox ? '' : `<span class="stars" id="lvstars">${starStr(S.stars[lv.id] || 0)}</span>`}</div>`;
   let side = '';
   if (lv.sandbox) {
-    side = `<div class="card goal"><p>Build anything with the chips you've unlocked. Add switches and lights from the toolbar. The table below updates as you build.</p></div>
+    side = `<div class="card goal"><p>Build anything with the parts you've unlocked. Add switches and lights from the toolbar. The table below updates as you build.</p></div>
       <div class="card"><h3>Truth table</h3><div class="tt" id="ttable"></div></div>
       <div class="card"><div class="cost" id="cost"></div></div>`;
   } else {
@@ -624,7 +755,7 @@ function update() {
 function renderCost(n) {
   const el = document.getElementById('cost'); if (!el) return;
   const lv = cur.lv;
-  el.innerHTML = `<div><h3 style="font-size:12px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;font-family:var(--font-body)">Transistors</h3>
+  el.innerHTML = `<div><h3 style="font-size:12px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;font-family:var(--font-mono)">Transistors</h3>
     <span class="big">${n}<small>CMOS</small></span></div>` + (lv.sandbox ? '' : `<ul><li>★ works</li><li>★★ ≤ ${lv.t2}</li><li>★★★ ≤ ${lv.t3}</li></ul>`);
 }
 
@@ -670,7 +801,7 @@ function renderBoard() {
 function setupBoard() {
   const wrap = document.getElementById('board');
   wrap.innerHTML = `<svg class="board" id="bsvg" viewBox="0 0 ${BW} ${BH}" role="img" aria-label="Circuit board">
-    <defs><pattern id="dotp" width="20" height="20" patternUnits="userSpaceOnUse"><circle class="dots" cx="10" cy="10" r="1.2"/></pattern></defs>
+    <defs><pattern id="dotp" width="20" height="20" patternUnits="userSpaceOnUse"><path class="gridl" d="M20 0H0V20" fill="none"/></pattern></defs>
     <rect width="${BW}" height="${BH}" fill="url(#dotp)"/><g id="gw"></g><g id="gc"></g></svg>`;
   const svg = document.getElementById('bsvg');
   const toSvg = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); };
@@ -804,9 +935,9 @@ function finish(count) {
     ? `<ul><li>★★★ no mistakes</li><li>★★ one or two mistakes</li><li>Mistakes this time: ${cur.tt.mistakes}</li></ul>`
     : `<p class="mono">Transistors: <b>${count}</b> · ★★ at ≤ ${lv.t2} · ★★★ at ≤ ${lv.t3}</p>${stars < 3 ? `<p>Can you get it to ${stars < 2 ? lv.t2 : lv.t3}?</p>` : ''}`;
   openModal(`<span class="eyebrow">Level ${i + 1} complete</span><h2>${esc(lv.title)}</h2><span class="stars">${starStr(stars)}</span>${crit}
-    ${newUnlock ? `<p class="unlock">New chip unlocked: ${lv.unlock}</p>` : ''}
+    ${newUnlock ? `<p class="unlock">New part unlocked: ${lv.unlock}. You can now use it in later levels and the sandbox.</p>` : ''}
     <div class="why"><b class="k">Why it works</b><p>${lv.why}</p></div>
-    <div class="row">${next ? `<button class="btn primary" data-act="level" data-id="${next.id}">Next: ${esc(next.title)}</button>` : `<button class="btn primary" data-act="home">Back to levels</button>`}
+    <div class="row">${next ? `<button class="btn primary" data-act="level" data-id="${next.id}">Next: ${esc(next.title)}</button>` : `<button class="btn primary" data-act="map">Back to the map</button>`}
     <button class="btn" data-act="close">Keep building</button></div>
     ${next ? '' : '<p class="tip">That is all of Version 1. Chapter 3 (Simplify) comes next.</p>'}`);
 }
@@ -911,6 +1042,10 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
   const a = b.dataset.act;
   if (a === 'home') return home();
+  if (a === 'map') return showMap();
+  if (a === 'welcome') return showWelcome();
+  if (a === 'levels') { modal.hidden = true; return showLevels(+b.dataset.ch || 1); }
+  if (a === 'preview') return showPreview(+b.dataset.ch);
   if (a === 'level') { modal.hidden = true; return openLevel(b.dataset.id); }
   if (a === 'sandbox') return openLevel('sandbox');
   if (a === 'close') { modal.hidden = true; return; }
