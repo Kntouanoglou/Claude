@@ -4,38 +4,34 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: three menu screens (welcome, map timeline, chapter levels) and a level screen with a sidebar beside a grid circuit board; stacks on phones. Clean & bright study-app look: white cards, soft shadows, one indigo accent; dark mode via the in-game toggle. */
+/* Layout: three menu screens (welcome, map timeline, chapter levels) and a level screen with a sidebar beside a grid circuit board; stacks on phones. Clean & bright study-app look: white cards, soft shadows, one indigo accent; dark by default, light via the in-game toggle. */
 :root {
-  --bg: #f5f6fb;
-  --panel: #ffffff;
-  --panel2: #f0f1f8;
-  --ink: #1b1e33;
-  --muted: #676c8c;
-  --line: #e3e5f0;
-  --board: #fbfbfe;
-  --dot: #eceef6;
-  --gate: #ffffff;
-  --hi: #4f46e5;        /* signal 1 + main accent: indigo */
-  --hi-soft: #eef0ff;
-  --on-hi: #ffffff;
-  --lo: #b3b7cb;        /* signal 0 */
-  --float: #0ea5e9;     /* floating wire: sky blue, dashed */
-  --err: #e11d48;       /* conflict / error */
-  --ok: #059669;
-  --glow: 0 0 0 3px rgba(79, 70, 229, .16);
-  --shadow: 0 1px 2px rgba(27, 30, 51, .04), 0 6px 20px rgba(27, 30, 51, .06);
+  --bg: #0f1021;
+  --panel: #181a2f;
+  --panel2: #20223a;
+  --ink: #eceefb;
+  --muted: #9ca0c0;
+  --line: #2b2e4a;
+  --board: #14162b;
+  --dot: #23263f;
+  --gate: #1d2037;
+  --hi: #8f89ff;
+  --hi-soft: #27254f;
+  --on-hi: #0f1021;
+  --lo: #4c5172;
+  --float: #38bdf8;
+  --err: #fb7185;
+  --ok: #34d399;
+  --glow: 0 0 0 3px rgba(143, 137, 255, .22), 0 0 22px rgba(143, 137, 255, .18);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
   --font-display: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
   --font-body: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  color-scheme: light;
-}
-:root[data-theme="dark"] {
-  --bg: #0f1021; --panel: #181a2f; --panel2: #20223a; --ink: #eceefb; --muted: #9ca0c0; --line: #2b2e4a;
-  --board: #14162b; --dot: #23263f; --gate: #1d2037; --hi: #8f89ff; --hi-soft: #27254f; --on-hi: #0f1021;
-  --lo: #4c5172; --float: #38bdf8; --err: #fb7185; --ok: #34d399;
-  --glow: 0 0 0 3px rgba(143, 137, 255, .22), 0 0 22px rgba(143, 137, 255, .18);
-  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
   color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #f5f6fb; --panel: #ffffff; --panel2: #f0f1f8; --ink: #1b1e33; --muted: #676c8c; --line: #e3e5f0; --board: #fbfbfe; --dot: #eceef6; --gate: #ffffff; --hi: #4f46e5; --hi-soft: #eef0ff; --on-hi: #ffffff; --lo: #b3b7cb; --float: #0ea5e9; --err: #e11d48; --ok: #059669; --glow: 0 0 0 3px rgba(79, 70, 229, .16); --shadow: 0 1px 2px rgba(27, 30, 51, .04), 0 6px 20px rgba(27, 30, 51, .06);
+  color-scheme: light;
 }
 * { box-sizing: border-box; }
 body {
@@ -342,8 +338,8 @@ function loadSave() {
 }
 let S = loadSave();
 const THEME_KEY = 'cpu-builder-theme';
-let theme = 'light';
-try { theme = localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'; } catch (e) {}
+let theme = 'dark';
+try { theme = localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'; } catch (e) {}
 document.documentElement.setAttribute('data-theme', theme);
 const SUN = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>';
 const MOON = '<svg viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z"/></svg>';
