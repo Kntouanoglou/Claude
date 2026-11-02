@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!-- Tells the browser this is an HTML5 document -->
+<html lang="en">
+
+<head>
+    <!-- Character encoding so special letters (like è, à) display correctly -->
+    <meta charset="UTF-8">
+    <!-- Makes the page scale properly on phones and tablets -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Short description of the page (used by search engines) -->
+    <meta name="description" content="ArtWalk Florence - your guide to the art museums of Florence, Italy.">
+    <!-- Text shown in the browser tab (change this on every page) -->
+    <title>ArtWalk Florence | Home</title>
+    <!-- Google Fonts: a classic serif for headings, a clean sans-serif for text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Our ONE external CSS file, shared by all pages -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ===== HEADER: logo + site name (same on every page) ===== -->
+    <header class="site-header">
+        <a href="index.html" class="logo">
+            <span class="logo-mark">AW</span>
+            <span class="logo-text">ArtWalk <em>Florence</em></span>
+        </a>
+        <p class="tagline">Your guide to the art museums of Florence</p>
+    </header>
+
+    <!-- ===== PAGE WRAPPER: main content on the left, menu on the right ===== -->
+    <div class="page">
+
+        <!-- ===== MAIN CONTENT (this is the part you change on each page) ===== -->
+        <main class="content">
+
+            <!-- Image slider (controlled by script.js) -->
+            <section class="slider" aria-label="Featured images">
+                <!-- Each slide is a <figure>. Only the one with class "active" is visible -->
+                <figure class="slide active">
+                    <img src="images/duomo.jpg" alt="Florence Cathedral (the Duomo) with its red dome">
+                    <figcaption>Florence Cathedral (Il Duomo)</figcaption>
+                </figure>
+                <figure class="slide">
+                    <img src="images/birth-of-venus.jpg" alt="The Birth of Venus by Sandro Botticelli">
+                    <figcaption>The Birth of Venus, Botticelli &ndash; Uffizi Gallery</figcaption>
+                </figure>
+                <figure class="slide">
+                    <img src="images/david.jpg" alt="Michelangelo's statue of David">
+                    <figcaption>David, Michelangelo &ndash; Galleria dell'Accademia</figcaption>
+                </figure>
+                <figure class="slide">
+                    <img src="images/ponte-vecchio.jpg" alt="The Ponte Vecchio bridge over the Arno river">
+                    <figcaption>Ponte Vecchio over the Arno</figcaption>
+                </figure>
+
+                <!-- Previous / next buttons -->
+                <button class="slider-btn prev" type="button" aria-label="Previous slide">&#10094;</button>
+                <button class="slider-btn next" type="button" aria-label="Next slide">&#10095;</button>
+
+                <!-- Small dots under the slider (created by JavaScript) -->
+                <div class="dots"></div>
+            </section>
+
+            <!-- Welcome text -->
+            <section class="intro">
+                <h1>Welcome to Florence, the Cradle of the Renaissance</h1>
+                <p>
+                    Florence holds one of the richest collections of art in the world.
+                    Botticelli, Michelangelo, Leonardo da Vinci and Raphael all worked here,
+                    and their masterpieces still fill the city's museums.
+                    <strong>ArtWalk Florence</strong> helps you choose which museums to visit,
+                    see what exhibitions are on, compare ticket prices and plan your day.
+                </p>
+            </section>
+
+            <!-- Three "feature" boxes laid out side by side with FLEXBOX -->
+            <section class="features">
+                <article class="card">
+                    <img src="images/uffizi.jpg" alt="The Uffizi Gallery building">
+                    <h2>Museum of the Month</h2>
+                    <p>The Uffizi Gallery: home of <em>The Birth of Venus</em> and <em>Primavera</em>.</p>
+                    <a href="museums.html" class="btn">Explore museums</a>
+                </article>
+                <article class="card">
+                    <img src="images/david.jpg" alt="Michelangelo's David">
+                    <h2>Don't Miss</h2>
+                    <p>Stand in front of Michelangelo's <em>David</em> at the Galleria dell'Accademia.</p>
+                    <a href="exhibitions.html" class="btn">What's on</a>
+                </article>
+                <article class="card">
+                    <img src="images/ponte-vecchio.jpg" alt="Ponte Vecchio">
+                    <h2>Plan Your Visit</h2>
+                    <p>Opening hours, directions and tips for skipping the queues.</p>
+                    <a href="visit.html" class="btn">How to get there</a>
+                </article>
+            </section>
+
+            <!-- A link to an outside website (required on every page) -->
+            <p class="external">
+                Official information:
+                <a href="https://www.uffizi.it/en" target="_blank" rel="noopener">Uffizi Galleries website</a>
+            </p>
+
+        </main>
+
+        <!-- ===== NAVIGATION MENU on the RIGHT (same on every page) ===== -->
+        <nav class="side-nav" aria-label="Main menu">
+            <h2 class="nav-title">Menu</h2>
+            <ul>
+                <!-- class="current" highlights the page you are on; move it on each page -->
+                <li><a href="index.html" class="current">Home</a></li>
+                <li><a href="museums.html">Museums</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="tickets.html">Tickets &amp; Prices</a></li>
+                <li><a href="offers.html">Special Offers</a></li>
+                <li><a href="visit.html">How to Get There</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+
+    </div>
+
+    <!-- ===== FOOTER (same on every page) ===== -->
+    <footer class="site-footer">
+        <p>&copy; <span id="year">2026</span> ArtWalk Florence &ndash; Student project for CSC206</p>
+        <p>Email us: <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a></p>
+    </footer>
+
+    <!-- Our ONE external JavaScript file. Placed at the end so the HTML loads first -->
+    <script src="script.js"></script>
+</body>
+
+</html>
