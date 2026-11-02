@@ -929,7 +929,7 @@ function renderGateTable() {
   const curRow = ins.map(c => c.v || 0).join('');
   let h = '<table><tr>' + ins.map(c => `<th>${esc(c.label)}</th>`).join('');
   if (lv.sandbox) h += outs.map((o, j) => `<th class="${j ? '' : 'sep'}">${esc(o.label)}</th>`).join('');
-  else h += outs.map((o, j) => `<th class="${j ? '' : 'sep'}">${esc(o.label)} want</th><th>yours</th>`).join('') + '<th></th>';
+  else h += outs.map((o, j) => `<th class="${j ? '' : 'sep'}">Correct ${esc(o.label)}</th><th>Your ${esc(o.label)}</th>`).join('') + '<th></th>';
   h += '</tr>';
   for (const row of rows) {
     h += `<tr class="${row.r.join('') === curRow ? 'cur' : ''}">` + row.r.map(b => `<td>${b}</td>`).join('');
@@ -1015,7 +1015,7 @@ function renderCmosTable() {
   const el = document.getElementById('ttable'); const lv = cur.lv, cm = cur.cm;
   const curRow = lv.inputs.map(k => cm.vals[k]).join('');
   const sv = v => v === 1 ? '1' : v === 0 ? '0' : v === 'Z' ? '<span class="z">float</span>' : '<span class="e">short</span>';
-  let h = '<table><tr>' + lv.inputs.map(k => `<th>${k}</th>`).join('') + '<th class="sep">want</th><th>yours</th><th></th></tr>';
+  let h = '<table><tr>' + lv.inputs.map(k => `<th>${k}</th>`).join('') + '<th class="sep">Correct output</th><th>Your output</th><th></th></tr>';
   for (const r of rowsFor(lv.inputs.length)) {
     const v = {}; lv.inputs.forEach((k, j) => v[k] = r[j]);
     const want = lv.fn(v), got = cmosOut(cm, v), ok = want === got;
