@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtWalk Florence | Exhibitions</title>
+    <!--
+        REFERENCE PAGE ONLY - look at it, then build your own exhibitions.html.
+        The CSS is inside this file (in <style>) only so it displays on its own.
+        In your project, put the new rules in style.css.
+    -->
+    <style>
+        /* ===== your existing styles (copied so this page looks like yours) ===== */
+        body { background-color: #f8f4ec; max-width: 1200px; margin: auto; }
+        #logo { border-radius: 50%; width: 55px; height: 55px; background-color: #b5523b; color: white;
+                display: flex; align-items: center; justify-content: center; font-size: 25px; }
+        header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #c9a227; }
+        #AWF { display: flex; gap: 10px; }
+        #leftside { display: flex; align-items: center; gap: 15px; }
+        #f { color: #b5523b; font-style: italic; }
+        header p { font-style: italic; color: #6b5f57; font-size: 20px; }
+        main { margin-top: 30px; display: flex; flex-direction: row-reverse; gap: 30px;
+               padding-right: 20px; padding-left: 20px; align-items: flex-start; }
+        main nav { width: 180px; background-color: white; border-radius: 7px; border-top: 5px solid #b5523b;
+                   padding: 20px; position: sticky; top: 20px; }
+        main nav h4 { text-transform: uppercase; color: #6b5f57; font-size: 20px; margin: 0; margin-bottom: 10px; }
+        #pages { margin: 0; padding: 0; list-style: none; }
+        #pages a { color: black; text-decoration: none; font-size: 18px; font-family: Arial, Helvetica, sans-serif;
+                   display: block; border-radius: 3px; border-bottom: 1px solid #e4dccd; padding: 10px; }
+        #pages a:hover { background-color: #f8f4ec; color: #b5523b; }
+        #pages a.current { background-color: #b5523b; color: white; }
+        .content { flex: 1; }
+        img { max-width: 100%; height: auto; }
+        .content h1 { color: #b5523b; font-size: 40px; margin: 0; }
+        .content > p { font-size: 20px; margin: 0; margin-top: 15px; margin-bottom: 30px; line-height: 30px; }
+        footer { border-top: 3px solid #c9a227; text-align: center; font-size: 18px; color: #6b5f57;
+                 padding: 20px; margin-top: 40px; }
+        footer p { margin: 10px; }
+        footer a { text-decoration: none; color: #b5523b; font-weight: bold; }
+
+        /* ===== NEW for the exhibitions page ===== */
+
+        /* section headings ("Now showing", "Coming soon") */
+        .content h2 {
+            color: #8f3d2b;
+            font-size: 28px;
+            margin: 0 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e4dccd;
+        }
+
+        /* one exhibition: image on the left, text on the right (FLEX row) */
+        .exhibition {
+            display: flex;
+            gap: 20px;
+            background-color: white;
+            border: 1px solid #e4dccd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .exhibition img {
+            width: 35%;                 /* image takes about a third */
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+        }
+
+        .exhibition .info {
+            flex: 1;                    /* text takes the rest */
+            padding: 20px 20px 20px 0;
+        }
+
+        .exhibition h3 {
+            margin: 0;
+            color: #8f3d2b;
+            font-size: 24px;
+        }
+
+        .exhibition p {
+            margin: 10px 0 0;
+            font-size: 17px;
+            line-height: 25px;
+        }
+
+        /* "where" line under the title */
+        .exhibition .where {
+            color: #6b5f57;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        /* small coloured box with the dates */
+        .dates {
+            display: inline-block;      /* a box that sits in the line */
+            margin-top: 10px;
+            padding: 4px 10px;
+            background-color: #c9a227;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        /* MULTICOLUMN: the "coming soon" text flows into 3 columns, like a newspaper */
+        .columns {
+            column-count: 3;            /* number of columns */
+            column-gap: 30px;           /* space between columns */
+            column-rule: 1px solid #e4dccd;   /* thin line between columns */
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 17px;
+            line-height: 25px;
+        }
+
+        /* space above the "Coming Soon" heading
+           (h2.soon is as strong as .content h2 and comes later, so it wins) */
+        h2.soon {
+            margin-top: 40px;
+        }
+
+        .columns h3 {
+            margin: 0 0 5px;
+            color: #b5523b;
+            font-size: 19px;
+            break-after: avoid;         /* keep the title with its text */
+        }
+
+        .columns p {
+            margin: 0 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div id="leftside">
+            <h3 id="logo">AW</h3>
+            <div id="AWF">
+                <h1>ArtWalk</h1>
+                <h1 id="f">Florence</h1>
+            </div>
+        </div>
+        <p>Your guide to the art museums of Florence</p>
+    </header>
+    <main>
+        <nav>
+            <h4>Menu</h4>
+            <ul id="pages">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="museums.html">Museums</a></li>
+                <li><a href="exhibitions.html" class="current">Exhibitions</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="tickets.html">Tickets &amp; Prices</a></li>
+                <li><a href="offers.html">Special Offers</a></li>
+                <li><a href="visit.html">How to Get There</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="content">
+
+            <!-- page title + intro -->
+            <h1>Exhibitions in Florence</h1>
+            <p>
+                Besides their permanent collections, Florence's museums host special exhibitions
+                all year round. Here is what you can see now, and what is coming next.
+            </p>
+
+            <!-- section 1: now showing (flex rows) -->
+            <h2>Now Showing</h2>
+
+            <article class="exhibition">
+                <img src="images/birth-of-venus.jpg" alt="The Birth of Venus by Botticelli">
+                <div class="info">
+                    <h3>Botticelli Up Close</h3>
+                    <p class="where">Uffizi Gallery</p>
+                    <span class="dates">1 Oct 2026 – 31 Jan 2027</span>
+                    <p>
+                        A rare chance to see Botticelli's masterpieces after restoration, with
+                        high-resolution scans that reveal the brushstrokes hidden under the varnish.
+                    </p>
+                </div>
+            </article>
+
+            <article class="exhibition">
+                <img src="images/david.jpg" alt="Michelangelo's David">
+                <div class="info">
+                    <h3>Michelangelo: From Sketch to Marble</h3>
+                    <p class="where">Galleria dell'Accademia</p>
+                    <span class="dates">15 Sep 2026 – 15 Feb 2027</span>
+                    <p>
+                        Thirty original drawings displayed next to the statues they became,
+                        showing how Michelangelo planned his work.
+                    </p>
+                </div>
+            </article>
+
+            <article class="exhibition">
+                <img src="images/ponte-vecchio.jpg" alt="The Ponte Vecchio">
+                <div class="info">
+                    <h3>Florence in Maps</h3>
+                    <p class="where">Palazzo Vecchio</p>
+                    <span class="dates">10 Nov 2026 – 28 Mar 2027</span>
+                    <p>
+                        Five centuries of the city drawn by hand, from Renaissance bird's-eye views
+                        to the first modern street plans.
+                    </p>
+                </div>
+            </article>
+
+            <!-- section 2: coming soon (MULTICOLUMN) -->
+            <h2 class="soon">Coming Soon</h2>
+            <div class="columns">
+                <h3>Women of the Renaissance</h3>
+                <p>
+                    Palazzo Pitti, from April 2027. Portraits of the powerful women of the Medici
+                    family, and works by Renaissance women painters who were forgotten for centuries.
+                </p>
+
+                <h3>Donatello and Bronze</h3>
+                <p>
+                    Bargello Museum, from May 2027. How Donatello brought bronze sculpture back
+                    to life, with casts, tools and his most famous statues side by side.
+                </p>
+
+                <h3>The Cathedral Builders</h3>
+                <p>
+                    Museo dell'Opera del Duomo, from June 2027. The story of Brunelleschi's dome,
+                    with original wooden models and the machines used to lift the stones.
+                </p>
+
+                <h3>Night at the Uffizi</h3>
+                <p>
+                    Uffizi Gallery, summer 2027. Late opening every Friday until 22:00, with
+                    guided tours by candlelight and music in the courtyard.
+                </p>
+            </div>
+
+        </div>
+    </main>
+    <footer>
+        <p id="first">© 2026 ArtWalk Florence – Student project for CSC206</p>
+        <p>Email us: <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a></p>
+    </footer>
+</body>
+</html>
