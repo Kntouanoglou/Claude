@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtWalk Florence | Contact</title>
+    <!--
+        FINISHED PAGE. In your project: copy the HTML between <body> and </body>,
+        put the CSS from <style> (the NEW part only) into style.css,
+        and the JavaScript from <script> (if any) into script.js.
+    -->
+    <style>
+        /* ===== your existing site styles (already in your style.css) ===== */
+        body { background-color: #f8f4ec; max-width: 1200px; margin: auto; }
+        #logo { border-radius: 50%; width: 55px; height: 55px; background-color: #b5523b; color: white;
+                display: flex; align-items: center; justify-content: center; font-size: 25px; }
+        header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #c9a227; }
+        #AWF { display: flex; gap: 10px; }
+        #leftside { display: flex; align-items: center; gap: 15px; }
+        #f { color: #b5523b; font-style: italic; }
+        header p { font-style: italic; color: #6b5f57; font-size: 20px; }
+        main { margin-top: 30px; display: flex; flex-direction: row-reverse; gap: 30px;
+               padding-right: 20px; padding-left: 20px; align-items: flex-start; }
+        main nav { width: 180px; flex-shrink: 0; background-color: white; border-radius: 7px;
+                   border-top: 5px solid #b5523b; padding: 20px; position: sticky; top: 20px; }
+        main nav h4 { text-transform: uppercase; color: #6b5f57; font-size: 20px; margin: 0; margin-bottom: 10px; }
+        #pages { margin: 0; padding: 0; list-style: none; }
+        #pages a { color: black; text-decoration: none; font-size: 18px; font-family: Arial, Helvetica, sans-serif;
+                   display: block; border-radius: 3px; border-bottom: 1px solid #e4dccd; padding: 10px; }
+        #pages a:hover { background-color: #f8f4ec; color: #b5523b; }
+        #pages a.current { background-color: #b5523b; color: white; }
+        .content { flex: 1; min-width: 0; }
+        img { max-width: 100%; height: auto; }
+        .content h1 { color: #b5523b; font-size: 40px; margin: 0; }
+        .content > p { font-size: 20px; margin: 0; margin-top: 15px; margin-bottom: 30px; line-height: 30px; }
+        p.standalone { background-color: white; padding: 15px; border-left: 4px solid #c9a227;
+                       margin-top: 40px; font-size: 18px; }
+        p.standalone a { color: #b5523b; text-decoration: none; font-weight: bold; }
+        .content h2 { color: #8f3d2b; font-size: 28px; margin: 40px 0 15px; padding-bottom: 8px;
+                      border-bottom: 2px solid #e4dccd; }
+        footer { border-top: 3px solid #c9a227; text-align: center; font-size: 18px; color: #6b5f57;
+                 padding: 20px; margin-top: 40px; }
+        footer p { margin: 10px; }
+        footer a { text-decoration: none; color: #b5523b; font-weight: bold; }
+
+        /* ===== NEW for this page: copy these into style.css ===== */
+
+        #contact_form {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            border-top: 5px solid #b5523b;
+        }
+
+        #contact_form > label {
+            display: block;
+            font-weight: bold;
+            color: #6b5f57;
+            margin: 15px 0 5px;
+        }
+
+        #contact_form input[type="text"],
+        #contact_form input[type="email"],
+        #contact_form textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: 17px;
+            font-family: inherit;
+            border: 1px solid #e4dccd;
+            border-radius: 5px;
+        }
+
+        /* the field you are typing in gets a terracotta border */
+        #contact_form input:focus,
+        #contact_form textarea:focus {
+            outline: none;
+            border-color: #b5523b;
+        }
+
+        /* a red border on fields with an error (class added by JS) */
+        #contact_form .invalid {
+            border-color: #c0392b;
+            background-color: #fdf2f0;
+        }
+
+        fieldset {
+            border: 1px solid #e4dccd;
+            border-radius: 5px;
+            margin: 15px 0 0;
+            padding: 10px 15px;
+        }
+
+        legend {
+            font-weight: bold;
+            color: #6b5f57;
+            padding: 0 5px;
+        }
+
+        fieldset label {
+            margin-right: 20px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        .error {
+            color: #c0392b;
+            font-size: 15px;
+            margin: 5px 0 0;
+            min-height: 18px;            /* keeps space so the form doesn't jump */
+        }
+
+        #contact_form button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background-color: #b5523b;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #contact_form button:hover {
+            background-color: #8f3d2b;
+        }
+
+        #form_success {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div id="leftside">
+            <h3 id="logo">AW</h3>
+            <div id="AWF">
+                <h1>ArtWalk</h1>
+                <h1 id="f">Florence</h1>
+            </div>
+        </div>
+        <p>Your guide to the art museums of Florence</p>
+    </header>
+    <main>
+        <nav>
+            <h4>Menu</h4>
+            <ul id="pages">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="museums.html">Museums</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="tickets.html">Tickets &amp; Prices</a></li>
+                <li><a href="offers.html">Special Offers</a></li>
+                <li><a href="visit.html">How to Get There</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="contact.html" class="current">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="content cont">
+            <h1>Contact Us</h1>
+            <p>
+                Questions about your visit, or want to book a guided tour?
+                Send us a message and we will reply within two days.
+            </p>
+
+            <!-- the FORM (requirement: text field, radio buttons / checkboxes, submit) -->
+            <form id="contact_form">
+
+                <label for="name">Your name</label>
+                <input type="text" id="name" name="name">
+                <p class="error" id="name_error"></p>
+
+                <label for="email">Your email</label>
+                <input type="email" id="email" name="email">
+                <p class="error" id="email_error"></p>
+
+                <!-- RADIO buttons: only one can be chosen (same name) -->
+                <fieldset>
+                    <legend>What is your message about?</legend>
+                    <label><input type="radio" name="topic" value="tour"> Guided tour</label>
+                    <label><input type="radio" name="topic" value="tickets"> Tickets</label>
+                    <label><input type="radio" name="topic" value="other"> Something else</label>
+                </fieldset>
+                <p class="error" id="topic_error"></p>
+
+                <!-- CHECKBOXES: any number can be chosen -->
+                <fieldset>
+                    <legend>Tour language (if booking a tour)</legend>
+                    <label><input type="checkbox" name="language" value="english"> English</label>
+                    <label><input type="checkbox" name="language" value="italian"> Italian</label>
+                    <label><input type="checkbox" name="language" value="greek"> Greek</label>
+                </fieldset>
+
+                <label for="message">Your message</label>
+                <textarea id="message" name="message" rows="5"></textarea>
+                <p class="error" id="message_error"></p>
+
+                <button type="submit">Send message</button>
+
+                <!-- shown by JavaScript after a valid submit -->
+                <p id="form_success"></p>
+            </form>
+
+            <p class="standalone">
+                Or email us directly at
+                <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a>.
+            </p>
+        </div>
+    </main>
+    <footer>
+        <p id="first">© 2026 ArtWalk Florence – Student project for CSC206</p>
+        <p>Email us: <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a></p>
+    </footer>
+    <script>
+        // copy this into script.js
+
+        /* ===== Contact form validation (contact page only) ===== */
+        const form = document.getElementById("contact_form");
+
+        if (form) {
+            // show or clear an error message under a field
+            function showError(fieldId, message) {
+                document.getElementById(fieldId + "_error").textContent = message;
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    if (message) {
+                        field.classList.add("invalid");
+                    } else {
+                        field.classList.remove("invalid");
+                    }
+                }
+            }
+
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();      // stop the page from reloading
+                let ok = true;
+
+                const name = document.getElementById("name").value.trim();
+                const email = document.getElementById("email").value.trim();
+                const message = document.getElementById("message").value.trim();
+                const topic = document.querySelector('input[name="topic"]:checked');
+
+                if (name === "") {
+                    showError("name", "Please enter your name.");
+                    ok = false;
+                } else {
+                    showError("name", "");
+                }
+
+                if (!email.includes("@") || !email.includes(".")) {
+                    showError("email", "Please enter a valid email address.");
+                    ok = false;
+                } else {
+                    showError("email", "");
+                }
+
+                if (topic === null) {
+                    showError("topic", "Please choose a topic.");
+                    ok = false;
+                } else {
+                    showError("topic", "");
+                }
+
+                if (message.length < 10) {
+                    showError("message", "Your message should be at least 10 characters.");
+                    ok = false;
+                } else {
+                    showError("message", "");
+                }
+
+                const success = document.getElementById("form_success");
+                if (ok) {
+                    success.textContent = "Thank you, " + name + "! We will reply within two days.";
+                    form.reset();
+                } else {
+                    success.textContent = "";
+                }
+            });
+        }
+    </script>
+</body>
+</html>

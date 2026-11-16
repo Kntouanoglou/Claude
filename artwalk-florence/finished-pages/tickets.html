@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtWalk Florence | Tickets &amp; Prices</title>
+    <!--
+        FINISHED PAGE. In your project: copy the HTML between <body> and </body>,
+        put the CSS from <style> (the NEW part only) into style.css,
+        and the JavaScript from <script> (if any) into script.js.
+    -->
+    <style>
+        /* ===== your existing site styles (already in your style.css) ===== */
+        body { background-color: #f8f4ec; max-width: 1200px; margin: auto; }
+        #logo { border-radius: 50%; width: 55px; height: 55px; background-color: #b5523b; color: white;
+                display: flex; align-items: center; justify-content: center; font-size: 25px; }
+        header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #c9a227; }
+        #AWF { display: flex; gap: 10px; }
+        #leftside { display: flex; align-items: center; gap: 15px; }
+        #f { color: #b5523b; font-style: italic; }
+        header p { font-style: italic; color: #6b5f57; font-size: 20px; }
+        main { margin-top: 30px; display: flex; flex-direction: row-reverse; gap: 30px;
+               padding-right: 20px; padding-left: 20px; align-items: flex-start; }
+        main nav { width: 180px; flex-shrink: 0; background-color: white; border-radius: 7px;
+                   border-top: 5px solid #b5523b; padding: 20px; position: sticky; top: 20px; }
+        main nav h4 { text-transform: uppercase; color: #6b5f57; font-size: 20px; margin: 0; margin-bottom: 10px; }
+        #pages { margin: 0; padding: 0; list-style: none; }
+        #pages a { color: black; text-decoration: none; font-size: 18px; font-family: Arial, Helvetica, sans-serif;
+                   display: block; border-radius: 3px; border-bottom: 1px solid #e4dccd; padding: 10px; }
+        #pages a:hover { background-color: #f8f4ec; color: #b5523b; }
+        #pages a.current { background-color: #b5523b; color: white; }
+        .content { flex: 1; min-width: 0; }
+        img { max-width: 100%; height: auto; }
+        .content h1 { color: #b5523b; font-size: 40px; margin: 0; }
+        .content > p { font-size: 20px; margin: 0; margin-top: 15px; margin-bottom: 30px; line-height: 30px; }
+        p.standalone { background-color: white; padding: 15px; border-left: 4px solid #c9a227;
+                       margin-top: 40px; font-size: 18px; }
+        p.standalone a { color: #b5523b; text-decoration: none; font-weight: bold; }
+        .content h2 { color: #8f3d2b; font-size: 28px; margin: 40px 0 15px; padding-bottom: 8px;
+                      border-bottom: 2px solid #e4dccd; }
+        footer { border-top: 3px solid #c9a227; text-align: center; font-size: 18px; color: #6b5f57;
+                 padding: 20px; margin-top: 40px; }
+        footer p { margin: 10px; }
+        footer a { text-decoration: none; color: #b5523b; font-weight: bold; }
+
+        /* ===== NEW for this page: copy these into style.css ===== */
+
+        /* TABLE */
+        table.prices {
+            width: 100%;
+            border-collapse: collapse;   /* one line between cells instead of double borders */
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            font-size: 18px;
+        }
+
+        table.prices th {
+            background-color: #b5523b;
+            color: white;
+            text-align: left;
+            padding: 12px 15px;
+        }
+
+        table.prices td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e4dccd;
+        }
+
+        /* striped rows: every second row a different colour */
+        table.prices tbody tr:nth-child(even) {
+            background-color: #fbf8f2;
+        }
+
+        table.prices tbody tr:hover {
+            background-color: #f3e9dc;
+        }
+
+        /* first column (museum names) in bold */
+        table.prices td:first-child {
+            font-weight: bold;
+            color: #8f3d2b;
+        }
+
+        .note {
+            color: #6b5f57;
+            font-style: italic;
+            font-size: 15px;
+            margin-top: 8px;
+        }
+
+        /* CALCULATOR */
+        #calculator {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px 20px;
+            align-items: end;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            border-top: 4px solid #c9a227;
+        }
+
+        #calculator label {
+            font-weight: bold;
+            color: #6b5f57;
+            grid-row: 1;                 /* all labels on the first row */
+        }
+
+        #calculator select,
+        #calculator input {
+            grid-row: 2;                 /* all fields on the second row */
+            padding: 10px;
+            font-size: 17px;
+            border: 1px solid #e4dccd;
+            border-radius: 5px;
+        }
+
+        #calc_total {
+            grid-column: 1 / -1;         /* the total spans all 3 columns */
+            margin: 10px 0 0;
+            font-size: 26px;
+            font-weight: bold;
+            color: #b5523b;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div id="leftside">
+            <h3 id="logo">AW</h3>
+            <div id="AWF">
+                <h1>ArtWalk</h1>
+                <h1 id="f">Florence</h1>
+            </div>
+        </div>
+        <p>Your guide to the art museums of Florence</p>
+    </header>
+    <main>
+        <nav>
+            <h4>Menu</h4>
+            <ul id="pages">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="museums.html">Museums</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="tickets.html" class="current">Tickets &amp; Prices</a></li>
+                <li><a href="offers.html">Special Offers</a></li>
+                <li><a href="visit.html">How to Get There</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="content tick">
+            <h1>Tickets &amp; Prices</h1>
+            <p>
+                Ticket prices for Florence's main museums. Students and visitors
+                under 18 pay less, and the museum pass gives you three museums in three days.
+            </p>
+
+            <h2>Ticket Prices</h2>
+
+            <!-- the price TABLE (requirement) -->
+            <table class="prices">
+                <thead>
+                    <tr>
+                        <th>Museum</th>
+                        <th>Adult</th>
+                        <th>Student</th>
+                        <th>Under 18</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Uffizi Gallery</td>
+                        <td>€25</td>
+                        <td>€12</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td>Galleria dell'Accademia</td>
+                        <td>€16</td>
+                        <td>€8</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td>Palazzo Pitti</td>
+                        <td>€16</td>
+                        <td>€8</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td>Bargello Museum</td>
+                        <td>€10</td>
+                        <td>€5</td>
+                        <td>Free</td>
+                    </tr>
+                    <tr>
+                        <td>Museo dell'Opera del Duomo</td>
+                        <td>€20</td>
+                        <td>€10</td>
+                        <td>€5</td>
+                    </tr>
+                    <tr>
+                        <td>Palazzo Vecchio</td>
+                        <td>€15</td>
+                        <td>€8</td>
+                        <td>Free</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="note">Prices are examples for this student project.</p>
+
+            <h2>Price Calculator</h2>
+
+            <!-- the CALCULATOR (for JavaScript): pick a museum, enter people, see the total -->
+            <div id="calculator">
+                <label for="calc_museum">Museum</label>
+                <select id="calc_museum">
+                    <option value="uffizi">Uffizi Gallery</option>
+                    <option value="accademia">Galleria dell'Accademia</option>
+                    <option value="pitti">Palazzo Pitti</option>
+                    <option value="bargello">Bargello Museum</option>
+                    <option value="duomo">Museo dell'Opera del Duomo</option>
+                    <option value="vecchio">Palazzo Vecchio</option>
+                </select>
+
+                <label for="calc_adults">Adults</label>
+                <input type="number" id="calc_adults" min="0" value="1">
+
+                <label for="calc_students">Students</label>
+                <input type="number" id="calc_students" min="0" value="0">
+
+                <p id="calc_total">Total: €25</p>
+            </div>
+
+            <p class="standalone">
+                Book official tickets on the
+                <a href="https://www.uffizi.it/en/tickets" target="_blank" rel="noopener">Uffizi Galleries website</a>.
+            </p>
+        </div>
+    </main>
+    <footer>
+        <p id="first">© 2026 ArtWalk Florence – Student project for CSC206</p>
+        <p>Email us: <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a></p>
+    </footer>
+    <script>
+        // copy this into script.js
+
+        /* ===== Ticket price calculator (tickets page only) ===== */
+        const calculator = document.getElementById("calculator");
+
+        if (calculator) {
+            // prices: [adult, student] for each museum (same as the table)
+            const prices = {
+                uffizi:    [25, 12],
+                accademia: [16, 8],
+                pitti:     [16, 8],
+                bargello:  [10, 5],
+                duomo:     [20, 10],
+                vecchio:   [15, 8]
+            };
+
+            const museumSelect = document.getElementById("calc_museum");
+            const adultsInput = document.getElementById("calc_adults");
+            const studentsInput = document.getElementById("calc_students");
+            const totalText = document.getElementById("calc_total");
+
+            function updateTotal() {
+                const price = prices[museumSelect.value];
+                const adults = Number(adultsInput.value) || 0;      // empty box counts as 0
+                const students = Number(studentsInput.value) || 0;
+                const total = adults * price[0] + students * price[1];
+                totalText.textContent = "Total: €" + total;
+            }
+
+            // recalculate every time something changes
+            museumSelect.addEventListener("change", updateTotal);
+            adultsInput.addEventListener("input", updateTotal);
+            studentsInput.addEventListener("input", updateTotal);
+
+            updateTotal();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtWalk Florence | Special Offers</title>
+    <!--
+        FINISHED PAGE. In your project: copy the HTML between <body> and </body>,
+        put the CSS from <style> (the NEW part only) into style.css,
+        and the JavaScript from <script> (if any) into script.js.
+    -->
+    <style>
+        /* ===== your existing site styles (already in your style.css) ===== */
+        body { background-color: #f8f4ec; max-width: 1200px; margin: auto; }
+        #logo { border-radius: 50%; width: 55px; height: 55px; background-color: #b5523b; color: white;
+                display: flex; align-items: center; justify-content: center; font-size: 25px; }
+        header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #c9a227; }
+        #AWF { display: flex; gap: 10px; }
+        #leftside { display: flex; align-items: center; gap: 15px; }
+        #f { color: #b5523b; font-style: italic; }
+        header p { font-style: italic; color: #6b5f57; font-size: 20px; }
+        main { margin-top: 30px; display: flex; flex-direction: row-reverse; gap: 30px;
+               padding-right: 20px; padding-left: 20px; align-items: flex-start; }
+        main nav { width: 180px; flex-shrink: 0; background-color: white; border-radius: 7px;
+                   border-top: 5px solid #b5523b; padding: 20px; position: sticky; top: 20px; }
+        main nav h4 { text-transform: uppercase; color: #6b5f57; font-size: 20px; margin: 0; margin-bottom: 10px; }
+        #pages { margin: 0; padding: 0; list-style: none; }
+        #pages a { color: black; text-decoration: none; font-size: 18px; font-family: Arial, Helvetica, sans-serif;
+                   display: block; border-radius: 3px; border-bottom: 1px solid #e4dccd; padding: 10px; }
+        #pages a:hover { background-color: #f8f4ec; color: #b5523b; }
+        #pages a.current { background-color: #b5523b; color: white; }
+        .content { flex: 1; min-width: 0; }
+        img { max-width: 100%; height: auto; }
+        .content h1 { color: #b5523b; font-size: 40px; margin: 0; }
+        .content > p { font-size: 20px; margin: 0; margin-top: 15px; margin-bottom: 30px; line-height: 30px; }
+        p.standalone { background-color: white; padding: 15px; border-left: 4px solid #c9a227;
+                       margin-top: 40px; font-size: 18px; }
+        p.standalone a { color: #b5523b; text-decoration: none; font-weight: bold; }
+        .content h2 { color: #8f3d2b; font-size: 28px; margin: 40px 0 15px; padding-bottom: 8px;
+                      border-bottom: 2px solid #e4dccd; }
+        footer { border-top: 3px solid #c9a227; text-align: center; font-size: 18px; color: #6b5f57;
+                 padding: 20px; margin-top: 40px; }
+        footer p { margin: 10px; }
+        footer a { text-decoration: none; color: #b5523b; font-weight: bold; }
+
+        /* ===== NEW for this page: copy these into style.css ===== */
+
+        .offers_list {
+            display: flex;
+            gap: 20px;
+        }
+
+        .offer {
+            flex: 1;
+            position: relative;          /* the badge is placed inside this card */
+            background-color: white;
+            border: 1px solid #e4dccd;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        /* hover: the card lifts up with a shadow */
+        .offer:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .offer img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 3 / 2;
+            object-fit: cover;
+        }
+
+        /* BADGE in the top-right corner (position absolute) */
+        .badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background-color: #b5523b;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .offer .text {
+            padding: 15px 20px 20px;
+        }
+
+        .offer h3 {
+            margin: 0 0 8px;
+            color: #8f3d2b;
+            font-size: 22px;
+        }
+
+        .offer .text p {
+            margin: 0;
+            font-size: 17px;
+            line-height: 24px;
+        }
+
+        .offer .valid {
+            margin-top: 10px !important;
+            color: #6b5f57;
+            font-style: italic;
+            font-size: 15px !important;
+        }
+
+        /* COUNTDOWN box */
+        #countdown_box {
+            margin-top: 40px;
+            background-color: #b5523b;
+            color: white;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        #countdown_box h2 {
+            color: white;
+            border: none;
+            margin: 0 0 10px;
+            padding: 0;
+        }
+
+        #countdown {
+            margin: 0;
+            font-size: 30px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div id="leftside">
+            <h3 id="logo">AW</h3>
+            <div id="AWF">
+                <h1>ArtWalk</h1>
+                <h1 id="f">Florence</h1>
+            </div>
+        </div>
+        <p>Your guide to the art museums of Florence</p>
+    </header>
+    <main>
+        <nav>
+            <h4>Menu</h4>
+            <ul id="pages">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="museums.html">Museums</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="tickets.html">Tickets &amp; Prices</a></li>
+                <li><a href="offers.html" class="current">Special Offers</a></li>
+                <li><a href="visit.html">How to Get There</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="content off">
+            <h1>Special Offers</h1>
+            <p>
+                Save money on your art trip to Florence with these offers.
+                Some of them are only available for a limited time.
+            </p>
+
+            <!-- the offer cards (idea: badge in the corner with position absolute) -->
+            <div class="offers_list">
+
+                <article class="offer">
+                    <span class="badge">−20%</span>
+                    <img src="images/uffizi.jpg" alt="The Uffizi Gallery">
+                    <div class="text">
+                        <h3>Student Week</h3>
+                        <p>20% off all museum tickets for students with a valid student card.</p>
+                        <p class="valid">Valid until 31 December 2026</p>
+                    </div>
+                </article>
+
+                <article class="offer">
+                    <span class="badge">3 for 2</span>
+                    <img src="images/pitti.jpg" alt="Palazzo Pitti">
+                    <div class="text">
+                        <h3>Three Museums Pass</h3>
+                        <p>Visit three museums and pay for only two. Valid for 3 days.</p>
+                        <p class="valid">Valid all year</p>
+                    </div>
+                </article>
+
+                <article class="offer">
+                    <span class="badge">Free</span>
+                    <img src="images/duomo.jpg" alt="Florence Cathedral">
+                    <div class="text">
+                        <h3>Free First Sunday</h3>
+                        <p>State museums are free on the first Sunday of every month.</p>
+                        <p class="valid">Every first Sunday</p>
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- COUNTDOWN (for JavaScript): updates every second -->
+            <div id="countdown_box">
+                <h2>Student Week ends in</h2>
+                <p id="countdown">-- days -- hours -- minutes -- seconds</p>
+            </div>
+
+            <p class="standalone">
+                Check the
+                <a href="https://www.uffizi.it/en" target="_blank" rel="noopener">official museum website</a>
+                for current conditions.
+            </p>
+        </div>
+    </main>
+    <footer>
+        <p id="first">© 2026 ArtWalk Florence – Student project for CSC206</p>
+        <p>Email us: <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a></p>
+    </footer>
+    <script>
+        // copy this into script.js
+
+        /* ===== Offer countdown (offers page only) ===== */
+        const countdown = document.getElementById("countdown");
+
+        if (countdown) {
+            const endDate = new Date("2026-12-31T23:59:59");   // when Student Week ends
+
+            function updateCountdown() {
+                const msLeft = endDate - new Date();          // milliseconds left
+
+                if (msLeft <= 0) {
+                    countdown.textContent = "This offer has ended";
+                    return;
+                }
+
+                const seconds = Math.floor(msLeft / 1000);
+                const days = Math.floor(seconds / 86400);           // 86400 seconds in a day
+                const hours = Math.floor((seconds % 86400) / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+
+                countdown.textContent = days + " days " + hours + " hours " +
+                                        minutes + " minutes " + secs + " seconds";
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);   // update every second
+        }
+    </script>
+</body>
+</html>
