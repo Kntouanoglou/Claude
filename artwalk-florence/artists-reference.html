@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtWalk Florence | Artists</title>
+    <!--
+        REFERENCE PAGE ONLY - look at it, then build your own artists.html.
+        The CSS is inside this file (in <style>) only so it displays on its own.
+        In your project, put the new rules in style.css.
+    -->
+    <style>
+        /* ===== your existing styles (copied so this page looks like yours) ===== */
+        body { background-color: #f8f4ec; max-width: 1200px; margin: auto; }
+        #logo { border-radius: 50%; width: 55px; height: 55px; background-color: #b5523b; color: white;
+                display: flex; align-items: center; justify-content: center; font-size: 25px; }
+        header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #c9a227; }
+        #AWF { display: flex; gap: 10px; }
+        #leftside { display: flex; align-items: center; gap: 15px; }
+        #f { color: #b5523b; font-style: italic; }
+        header p { font-style: italic; color: #6b5f57; font-size: 20px; }
+        main { margin-top: 30px; display: flex; flex-direction: row-reverse; gap: 30px;
+               padding-right: 20px; padding-left: 20px; align-items: flex-start; }
+        main nav { width: 180px; flex-shrink: 0; background-color: white; border-radius: 7px; border-top: 5px solid #b5523b;
+                   padding: 20px; position: sticky; top: 20px; }
+        main nav h4 { text-transform: uppercase; color: #6b5f57; font-size: 20px; margin: 0; margin-bottom: 10px; }
+        #pages { margin: 0; padding: 0; list-style: none; }
+        #pages a { color: black; text-decoration: none; font-size: 18px; font-family: Arial, Helvetica, sans-serif;
+                   display: block; border-radius: 3px; border-bottom: 1px solid #e4dccd; padding: 10px; }
+        #pages a:hover { background-color: #f8f4ec; color: #b5523b; }
+        #pages a.current { background-color: #b5523b; color: white; }
+        .content { flex: 1; }
+        img { max-width: 100%; height: auto; }
+        .content h1 { color: #b5523b; font-size: 40px; margin: 0; }
+        .content > p { font-size: 20px; margin: 0; margin-top: 15px; margin-bottom: 30px; line-height: 30px; }
+        footer { border-top: 3px solid #c9a227; text-align: center; font-size: 18px; color: #6b5f57;
+                 padding: 20px; margin-top: 40px; }
+        footer p { margin: 10px; }
+        footer a { text-decoration: none; color: #b5523b; font-weight: bold; }
+
+        /* ===== NEW for the artists page (div class="content art") ===== */
+
+        /* one artist: round portrait on the left, text on the right (FLEX row) */
+        .artist {
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;    /* portrait stays at the top, not stretched */
+            background-color: white;
+            border: 1px solid #e4dccd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* ROUND portrait: equal width + height + border-radius 50% */
+        .artist img {
+            width: 130px;
+            aspect-ratio: 1 / 1;        /* square ... */
+            border-radius: 50%;         /* ... turned into a circle */
+            object-fit: cover;          /* crop, don't squash */
+            flex-shrink: 0;             /* never squeezed by the text */
+            border: 3px solid #c9a227;  /* gold frame */
+        }
+
+        .artist .bio {
+            flex: 1;                    /* text takes the rest of the row */
+        }
+
+        .art .artist h3 {
+            margin: 0;
+            color: #8f3d2b;
+            font-size: 24px;
+        }
+
+        /* years under the name */
+        .art .years {
+            margin: 3px 0 10px;
+            color: #6b5f57;
+            font-style: italic;
+        }
+
+        .art .bio p {
+            margin: 0 0 10px;
+            font-size: 17px;
+            line-height: 25px;
+        }
+
+        /* STYLED LIST of works (the "list" requirement) */
+        .works {
+            margin: 5px 0 0;
+            padding-left: 20px;         /* room for the markers */
+            font-size: 16px;
+            line-height: 24px;
+        }
+
+        .works li::marker {
+            color: #b5523b;             /* terracotta bullets */
+        }
+
+        .works li span {
+            color: #6b5f57;             /* museum name in grey */
+        }
+
+        /* section with an ordered list: "a walk through the Renaissance" */
+        .art h2 {
+            color: #8f3d2b;
+            font-size: 28px;
+            margin: 40px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e4dccd;
+        }
+
+        .timeline {
+            list-style: none;           /* remove default numbers ... */
+            counter-reset: step;        /* ... and make our own */
+            padding: 0;
+            margin: 0;
+        }
+
+        .timeline li {
+            counter-increment: step;
+            position: relative;
+            padding: 12px 15px 12px 60px;
+            margin-bottom: 10px;
+            background-color: white;
+            border-left: 4px solid #c9a227;
+            border-radius: 6px;
+            font-size: 17px;
+        }
+
+        /* the round number badge on the left */
+        .timeline li::before {
+            content: counter(step);
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #b5523b;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div id="leftside">
+            <h3 id="logo">AW</h3>
+            <div id="AWF">
+                <h1>ArtWalk</h1>
+                <h1 id="f">Florence</h1>
+            </div>
+        </div>
+        <p>Your guide to the art museums of Florence</p>
+    </header>
+    <main>
+        <nav>
+            <h4>Menu</h4>
+            <ul id="pages">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="museums.html">Museums</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="artists.html" class="current">Artists</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="tickets.html">Tickets &amp; Prices</a></li>
+                <li><a href="offers.html">Special Offers</a></li>
+                <li><a href="visit.html">How to Get There</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="content art">
+
+            <h1>Masters of the Renaissance</h1>
+            <p>
+                The greatest artists of the Renaissance lived and worked in Florence.
+                Meet some of them, and find out where to see their work in the city today.
+            </p>
+
+            <!-- one artist -->
+            <article class="artist">
+                <img src="images/birth-of-venus.jpg" alt="Detail of The Birth of Venus by Botticelli">
+                <div class="bio">
+                    <h3>Sandro Botticelli</h3>
+                    <p class="years">1445 – 1510</p>
+                    <p>Painter of graceful figures and mythological scenes, and a favourite of the Medici family.</p>
+                    <ul class="works">
+                        <li><em>The Birth of Venus</em> <span>– Uffizi Gallery</span></li>
+                        <li><em>Primavera</em> <span>– Uffizi Gallery</span></li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="artist">
+                <img src="images/david.jpg" alt="Michelangelo's David">
+                <div class="bio">
+                    <h3>Michelangelo Buonarroti</h3>
+                    <p class="years">1475 – 1564</p>
+                    <p>Sculptor, painter and architect. He carved David from a single block of marble at 26.</p>
+                    <ul class="works">
+                        <li><em>David</em> <span>– Galleria dell'Accademia</span></li>
+                        <li><em>Doni Tondo</em> <span>– Uffizi Gallery</span></li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="artist">
+                <img src="images/uffizi.jpg" alt="The Uffizi Gallery">
+                <div class="bio">
+                    <h3>Leonardo da Vinci</h3>
+                    <p class="years">1452 – 1519</p>
+                    <p>Painter, inventor and scientist, trained in Florence in the workshop of Verrocchio.</p>
+                    <ul class="works">
+                        <li><em>Annunciation</em> <span>– Uffizi Gallery</span></li>
+                        <li><em>Adoration of the Magi</em> <span>– Uffizi Gallery</span></li>
+                    </ul>
+                </div>
+            </article>
+
+            <!-- section with an ORDERED list -->
+            <h2>A Walk Through the Renaissance</h2>
+            <ol class="timeline">
+                <li><strong>Giotto</strong> designs the cathedral's bell tower (1334).</li>
+                <li><strong>Brunelleschi</strong> completes the dome of the Duomo (1436).</li>
+                <li><strong>Donatello</strong> casts his bronze <em>David</em> (around 1440).</li>
+                <li><strong>Botticelli</strong> paints <em>The Birth of Venus</em> (around 1485).</li>
+                <li><strong>Michelangelo</strong> finishes his marble <em>David</em> (1504).</li>
+            </ol>
+
+        </div>
+    </main>
+    <footer>
+        <p id="first">© 2026 ArtWalk Florence – Student project for CSC206</p>
+        <p>Email us: <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a></p>
+    </footer>
+</body>
+</html>
