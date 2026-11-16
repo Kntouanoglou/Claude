@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtWalk Florence | Special Offers</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- HTML ONLY: no styling yet. Write the CSS yourself in style.css. -->
+    <header>
+        <div id="leftside">
+            <h3 id="logo">AW</h3>
+            <div id="AWF">
+                <h1>ArtWalk</h1>
+                <h1 id="f">Florence</h1>
+            </div>
+        </div>
+        <p>Your guide to the art museums of Florence</p>
+    </header>
+    <main>
+        <nav>
+            <h4>Menu</h4>
+            <ul id="pages">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="museums.html">Museums</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="tickets.html">Tickets &amp; Prices</a></li>
+                <li><a href="offers.html" class="current">Special Offers</a></li>
+                <li><a href="visit.html">How to Get There</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="content off">
+            <h1>Special Offers</h1>
+            <p>
+                Save money on your art trip to Florence with these offers.
+                Some of them are only available for a limited time.
+            </p>
+
+            <!-- the offer cards (idea: badge in the corner with position absolute) -->
+            <div class="offers_list">
+
+                <article class="offer">
+                    <span class="badge">−20%</span>
+                    <img src="images/uffizi.jpg" alt="The Uffizi Gallery">
+                    <div class="text">
+                        <h3>Student Week</h3>
+                        <p>20% off all museum tickets for students with a valid student card.</p>
+                        <p class="valid">Valid until 31 December 2026</p>
+                    </div>
+                </article>
+
+                <article class="offer">
+                    <span class="badge">3 for 2</span>
+                    <img src="images/pitti.jpg" alt="Palazzo Pitti">
+                    <div class="text">
+                        <h3>Three Museums Pass</h3>
+                        <p>Visit three museums and pay for only two. Valid for 3 days.</p>
+                        <p class="valid">Valid all year</p>
+                    </div>
+                </article>
+
+                <article class="offer">
+                    <span class="badge">Free</span>
+                    <img src="images/duomo.jpg" alt="Florence Cathedral">
+                    <div class="text">
+                        <h3>Free First Sunday</h3>
+                        <p>State museums are free on the first Sunday of every month.</p>
+                        <p class="valid">Every first Sunday</p>
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- COUNTDOWN (for JavaScript): updates every second -->
+            <div id="countdown_box">
+                <h2>Student Week ends in</h2>
+                <p id="countdown">-- days -- hours -- minutes -- seconds</p>
+            </div>
+
+            <p class="standalone">
+                Check the
+                <a href="https://www.uffizi.it/en" target="_blank" rel="noopener">official museum website</a>
+                for current conditions.
+            </p>
+        </div>
+    </main>
+    <footer>
+        <p id="first">© 2026 ArtWalk Florence – Student project for CSC206</p>
+        <p>Email us: <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a></p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtWalk Florence | How to Get There</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- HTML ONLY: no styling yet. Write the CSS yourself in style.css. -->
+    <header>
+        <div id="leftside">
+            <h3 id="logo">AW</h3>
+            <div id="AWF">
+                <h1>ArtWalk</h1>
+                <h1 id="f">Florence</h1>
+            </div>
+        </div>
+        <p>Your guide to the art museums of Florence</p>
+    </header>
+    <main>
+        <nav>
+            <h4>Menu</h4>
+            <ul id="pages">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="museums.html">Museums</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="tickets.html">Tickets &amp; Prices</a></li>
+                <li><a href="offers.html">Special Offers</a></li>
+                <li><a href="visit.html" class="current">How to Get There</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="content visit">
+            <h1>How to Get There</h1>
+            <p>
+                Florence's museums are all in the historic centre, within walking distance
+                of each other and of the main train station.
+            </p>
+
+            <!-- the MAP (iframe embed from Google Maps: Share > Embed a map > copy HTML) -->
+            <div class="map">
+                <iframe
+                    src="https://www.google.com/maps?q=Uffizi+Gallery+Florence&output=embed"
+                    title="Map of the Uffizi Gallery in Florence"
+                    loading="lazy">
+                </iframe>
+            </div>
+
+            <!-- two blocks side by side: directions + opening hours -->
+            <div class="visit_info">
+
+                <section class="directions">
+                    <h2>Getting Here</h2>
+                    <ul>
+                        <li><strong>By train:</strong> Firenze Santa Maria Novella station, 15 minutes on foot.</li>
+                        <li><strong>By plane:</strong> Florence Airport, then the tram (line T2) to the centre.</li>
+                        <li><strong>By bus:</strong> lines C1 and C2 stop near Piazza della Signoria.</li>
+                        <li><strong>By car:</strong> the centre is a limited traffic zone, so use a car park outside it.</li>
+                    </ul>
+                </section>
+
+                <section class="hours">
+                    <h2>Opening Hours</h2>
+                    <ul>
+                        <li><span>Uffizi Gallery</span> Tue – Sun, 8:15 – 18:30</li>
+                        <li><span>Accademia</span> Tue – Sun, 8:15 – 18:50</li>
+                        <li><span>Palazzo Pitti</span> Tue – Sun, 8:15 – 18:30</li>
+                        <li><span>Palazzo Vecchio</span> Every day, 9:00 – 19:00</li>
+                    </ul>
+                    <p class="note">Most state museums are closed on Mondays.</p>
+                </section>
+
+            </div>
+
+            <h2>Tips for Your Visit</h2>
+            <ol class="tips">
+                <li>Book tickets online to skip the queues.</li>
+                <li>Arrive early in the morning, when it is less crowded.</li>
+                <li>Wear comfortable shoes: the centre is best explored on foot.</li>
+            </ol>
+
+            <p class="standalone">
+                Plan your journey with
+                <a href="https://www.trenitalia.com/en.html" target="_blank" rel="noopener">Trenitalia</a>.
+            </p>
+        </div>
+    </main>
+    <footer>
+        <p id="first">© 2026 ArtWalk Florence – Student project for CSC206</p>
+        <p>Email us: <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a></p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

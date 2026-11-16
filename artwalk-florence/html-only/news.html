@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtWalk Florence | News</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- HTML ONLY: no styling yet. Write the CSS yourself in style.css. -->
+    <header>
+        <div id="leftside">
+            <h3 id="logo">AW</h3>
+            <div id="AWF">
+                <h1>ArtWalk</h1>
+                <h1 id="f">Florence</h1>
+            </div>
+        </div>
+        <p>Your guide to the art museums of Florence</p>
+    </header>
+    <main>
+        <nav>
+            <h4>Menu</h4>
+            <ul id="pages">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="museums.html">Museums</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="tickets.html">Tickets &amp; Prices</a></li>
+                <li><a href="offers.html">Special Offers</a></li>
+                <li><a href="visit.html">How to Get There</a></li>
+                <li><a href="news.html" class="current">News</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="content news">
+            <h1>News</h1>
+            <p>The latest from Florence's museums: new exhibitions, restorations and events.</p>
+
+            <!-- latest story (bigger, with a VIDEO: requirement) -->
+            <article class="news_item featured">
+                <p class="news_date">10 November 2026</p>
+                <h2>Inside the Uffizi: a Video Tour</h2>
+                <p>
+                    Take a virtual walk through the rooms of the Uffizi Gallery
+                    before your visit and discover what not to miss.
+                </p>
+                <div class="video">
+                    <!-- replace VIDEO_ID with a real YouTube video id (YouTube: Share > Embed) -->
+                    <iframe
+                        src="https://www.youtube.com/embed/VIDEO_ID"
+                        title="Video tour of the Uffizi Gallery"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </article>
+
+            <!-- other stories -->
+            <article class="news_item">
+                <img src="images/david.jpg" alt="Michelangelo's David">
+                <div class="text">
+                    <p class="news_date">2 November 2026</p>
+                    <h3>David Gets a Check-up</h3>
+                    <p>Experts examined Michelangelo's David with lasers to check the marble's condition.</p>
+                </div>
+            </article>
+
+            <article class="news_item">
+                <img src="images/pitti.jpg" alt="Palazzo Pitti">
+                <div class="text">
+                    <p class="news_date">25 October 2026</p>
+                    <h3>New Rooms Open at Palazzo Pitti</h3>
+                    <p>Four restored rooms of the royal apartments are open to visitors again.</p>
+                </div>
+            </article>
+
+            <article class="news_item">
+                <img src="images/ponte-vecchio.jpg" alt="Ponte Vecchio">
+                <div class="text">
+                    <p class="news_date">18 October 2026</p>
+                    <h3>Museum Night in December</h3>
+                    <p>On 12 December, museums stay open until midnight with free concerts.</p>
+                </div>
+            </article>
+
+            <p class="standalone">
+                More news on the
+                <a href="https://www.uffizi.it/en/news" target="_blank" rel="noopener">Uffizi Galleries website</a>.
+            </p>
+        </div>
+    </main>
+    <footer>
+        <p id="first">© 2026 ArtWalk Florence – Student project for CSC206</p>
+        <p>Email us: <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a></p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

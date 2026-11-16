@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtWalk Florence | Gallery</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- HTML ONLY: no styling yet. Write the CSS yourself in style.css. -->
+    <header>
+        <div id="leftside">
+            <h3 id="logo">AW</h3>
+            <div id="AWF">
+                <h1>ArtWalk</h1>
+                <h1 id="f">Florence</h1>
+            </div>
+        </div>
+        <p>Your guide to the art museums of Florence</p>
+    </header>
+    <main>
+        <nav>
+            <h4>Menu</h4>
+            <ul id="pages">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="museums.html">Museums</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="gallery.html" class="current">Gallery</a></li>
+                <li><a href="tickets.html">Tickets &amp; Prices</a></li>
+                <li><a href="offers.html">Special Offers</a></li>
+                <li><a href="visit.html">How to Get There</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="content gal">
+            <h1>Gallery</h1>
+            <p>
+                Some of the most famous works of art you can see in Florence.
+                Click a picture to see it bigger.
+            </p>
+
+            <!-- the grid of artworks (idea: CSS Grid) -->
+            <div class="gallery_grid">
+
+                <!-- one artwork: figure = image + caption -->
+                <figure class="artwork">
+                    <img src="images/birth-of-venus.jpg" alt="The Birth of Venus by Botticelli">
+                    <figcaption>
+                        <strong>The Birth of Venus</strong>
+                        <span>Botticelli – Uffizi Gallery</span>
+                    </figcaption>
+                </figure>
+
+                <figure class="artwork">
+                    <img src="images/david.jpg" alt="David by Michelangelo">
+                    <figcaption>
+                        <strong>David</strong>
+                        <span>Michelangelo – Galleria dell'Accademia</span>
+                    </figcaption>
+                </figure>
+
+                <figure class="artwork">
+                    <img src="images/duomo.jpg" alt="The dome of Florence Cathedral">
+                    <figcaption>
+                        <strong>The Dome</strong>
+                        <span>Brunelleschi – Duomo</span>
+                    </figcaption>
+                </figure>
+
+                <figure class="artwork">
+                    <img src="images/ponte-vecchio.jpg" alt="The Ponte Vecchio bridge">
+                    <figcaption>
+                        <strong>Ponte Vecchio</strong>
+                        <span>Medieval bridge over the Arno</span>
+                    </figcaption>
+                </figure>
+
+                <figure class="artwork">
+                    <img src="images/uffizi.jpg" alt="The Uffizi Gallery courtyard">
+                    <figcaption>
+                        <strong>The Uffizi</strong>
+                        <span>Vasari – Uffizi Gallery</span>
+                    </figcaption>
+                </figure>
+
+                <figure class="artwork">
+                    <img src="images/pitti.jpg" alt="Palazzo Pitti">
+                    <figcaption>
+                        <strong>Palazzo Pitti</strong>
+                        <span>Former royal palace</span>
+                    </figcaption>
+                </figure>
+
+                <figure class="artwork">
+                    <img src="images/bargello.jpg" alt="The Bargello courtyard">
+                    <figcaption>
+                        <strong>The Bargello</strong>
+                        <span>Renaissance sculpture museum</span>
+                    </figcaption>
+                </figure>
+
+                <figure class="artwork">
+                    <img src="images/opera-duomo.jpg" alt="Museo dell'Opera del Duomo">
+                    <figcaption>
+                        <strong>Gates of Paradise</strong>
+                        <span>Ghiberti – Museo dell'Opera del Duomo</span>
+                    </figcaption>
+                </figure>
+
+                <figure class="artwork">
+                    <img src="images/palazzo-vecchio.jpg" alt="Palazzo Vecchio">
+                    <figcaption>
+                        <strong>Palazzo Vecchio</strong>
+                        <span>Florence's town hall</span>
+                    </figcaption>
+                </figure>
+
+            </div>
+
+            <!-- LIGHTBOX (for JavaScript): hidden until an image is clicked -->
+            <div id="lightbox">
+                <button id="lightbox_close" type="button">&times;</button>
+                <img id="lightbox_img" src="" alt="">
+                <p id="lightbox_caption"></p>
+            </div>
+
+            <p class="standalone">
+                All artwork images from
+                <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a>.
+            </p>
+        </div>
+    </main>
+    <footer>
+        <p id="first">© 2026 ArtWalk Florence – Student project for CSC206</p>
+        <p>Email us: <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a></p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

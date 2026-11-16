@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtWalk Florence | Contact</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- HTML ONLY: no styling yet. Write the CSS yourself in style.css. -->
+    <header>
+        <div id="leftside">
+            <h3 id="logo">AW</h3>
+            <div id="AWF">
+                <h1>ArtWalk</h1>
+                <h1 id="f">Florence</h1>
+            </div>
+        </div>
+        <p>Your guide to the art museums of Florence</p>
+    </header>
+    <main>
+        <nav>
+            <h4>Menu</h4>
+            <ul id="pages">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="museums.html">Museums</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="tickets.html">Tickets &amp; Prices</a></li>
+                <li><a href="offers.html">Special Offers</a></li>
+                <li><a href="visit.html">How to Get There</a></li>
+                <li><a href="news.html">News</a></li>
+                <li><a href="contact.html" class="current">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="content cont">
+            <h1>Contact Us</h1>
+            <p>
+                Questions about your visit, or want to book a guided tour?
+                Send us a message and we will reply within two days.
+            </p>
+
+            <!-- the FORM (requirement: text field, radio buttons / checkboxes, submit) -->
+            <form id="contact_form">
+
+                <label for="name">Your name</label>
+                <input type="text" id="name" name="name">
+                <p class="error" id="name_error"></p>
+
+                <label for="email">Your email</label>
+                <input type="email" id="email" name="email">
+                <p class="error" id="email_error"></p>
+
+                <!-- RADIO buttons: only one can be chosen (same name) -->
+                <fieldset>
+                    <legend>What is your message about?</legend>
+                    <label><input type="radio" name="topic" value="tour"> Guided tour</label>
+                    <label><input type="radio" name="topic" value="tickets"> Tickets</label>
+                    <label><input type="radio" name="topic" value="other"> Something else</label>
+                </fieldset>
+                <p class="error" id="topic_error"></p>
+
+                <!-- CHECKBOXES: any number can be chosen -->
+                <fieldset>
+                    <legend>Tour language (if booking a tour)</legend>
+                    <label><input type="checkbox" name="language" value="english"> English</label>
+                    <label><input type="checkbox" name="language" value="italian"> Italian</label>
+                    <label><input type="checkbox" name="language" value="greek"> Greek</label>
+                </fieldset>
+
+                <label for="message">Your message</label>
+                <textarea id="message" name="message" rows="5"></textarea>
+                <p class="error" id="message_error"></p>
+
+                <button type="submit">Send message</button>
+
+                <!-- shown by JavaScript after a valid submit -->
+                <p id="form_success"></p>
+            </form>
+
+            <p class="standalone">
+                Or email us directly at
+                <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a>.
+            </p>
+        </div>
+    </main>
+    <footer>
+        <p id="first">© 2026 ArtWalk Florence – Student project for CSC206</p>
+        <p>Email us: <a href="mailto:info@artwalkflorence.example">info@artwalkflorence.example</a></p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
