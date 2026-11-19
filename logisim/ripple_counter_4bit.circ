@@ -56,6 +56,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <wire from="(720,100)" to="(720,150)"/>
     <comp lib="0" loc="(170,210)" name="Clock"/>
     <comp lib="4" loc="(250,200)" name="J-K Flip-Flop">
+      <a name="appearance" val="classic"/>
       <a name="trigger" val="falling"/>
       <a name="label" val="FF1"/>
     </comp>
@@ -68,6 +69,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="labelloc" val="north"/>
     </comp>
     <comp lib="4" loc="(400,200)" name="J-K Flip-Flop">
+      <a name="appearance" val="classic"/>
       <a name="trigger" val="falling"/>
       <a name="label" val="FF2"/>
     </comp>
@@ -80,6 +82,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="labelloc" val="north"/>
     </comp>
     <comp lib="4" loc="(550,200)" name="J-K Flip-Flop">
+      <a name="appearance" val="classic"/>
       <a name="trigger" val="falling"/>
       <a name="label" val="FF3"/>
     </comp>
@@ -92,6 +95,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="labelloc" val="north"/>
     </comp>
     <comp lib="4" loc="(700,200)" name="J-K Flip-Flop">
+      <a name="appearance" val="classic"/>
       <a name="trigger" val="falling"/>
       <a name="label" val="FF4"/>
     </comp>
