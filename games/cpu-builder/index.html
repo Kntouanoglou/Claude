@@ -312,6 +312,8 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--hi); o
 .sheet th, .sheet td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .sheet th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
 .unlock { font-family: var(--font-mono); font-size: 14px; color: var(--hi); }
+.sheet .result { font-size: 18px; font-weight: 600; }
+.sheet .rules { font-size: 13.5px; color: var(--muted); margin-top: -6px; }
 
 /* Clean & bright surfaces */
 .card, .step, .lvcard, .tab, .boardwrap, .rung .ic, .how .card { box-shadow: var(--shadow); }
@@ -959,14 +961,26 @@ function finish(count) {
   cur.msg = 'Passed!'; cur.msgCls = 'good'; update();
   const ls = document.getElementById('lvstars'); if (ls) ls.innerHTML = starStr(S.stars[lv.id]);
   const i = levelIndex(), next = LEVELS[i + 1];
-  const crit = lv.kind === 'truth'
-    ? `<ul><li>★★★ no mistakes</li><li>★★ one or two mistakes</li><li>Mistakes this time: ${cur.tt.mistakes}</li></ul>`
-    : `<p class="mono">Transistors: <b>${count}</b> · ★★ at ≤ ${lv.t2} · ★★★ at ≤ ${lv.t3}</p>${stars < 3 ? `<p>Can you get it to ${stars < 2 ? lv.t2 : lv.t3}?</p>` : ''}`;
+  const T = n => `${n} transistor${n === 1 ? '' : 's'}`;
+  let result, rules = '';
+  if (lv.kind === 'truth') {
+    const m = cur.tt.mistakes;
+    result = m === 0 ? 'Perfect, no mistakes!' : `You made ${m} mistake${m > 1 ? 's' : ''}. Play again for 3 stars?`;
+    rules = '3 stars = no mistakes · 2 stars = 1 or 2 mistakes';
+  } else if (lv.t3 === 0) {
+    result = 'Connected! Your wire works.';
+  } else {
+    result = stars === 3 ? `You used ${T(count)}, the fewest possible!`
+      : stars === 2 ? `You used ${T(count)}. Can you do it with ${lv.t3}?`
+      : `It works with ${T(count)}. Can you do it with ${lv.t2} or fewer?`;
+    rules = lv.t2 === lv.t3 ? `3 stars = ${T(lv.t3)} or fewer` : `3 stars = ${T(lv.t3)} or fewer · 2 stars = ${T(lv.t2)} or fewer`;
+  }
+  const crit = `<p class="result">${result}</p>${rules ? `<p class="rules">${rules}</p>` : ''}`;
   openModal(`<span class="eyebrow">Level ${i + 1} complete</span><h2>${esc(lv.title)}</h2><span class="stars">${starStr(stars)}</span>${crit}
     ${newUnlock ? `<p class="unlock">New part unlocked: ${lv.unlock}. You can now use it in later levels and the sandbox.</p>` : ''}
     <div class="why"><b class="k">Why it works</b><p>${lv.why}</p></div>
     <div class="row">${next ? `<button class="btn primary" data-act="level" data-id="${next.id}">Next: ${esc(next.title)}</button>` : `<button class="btn primary" data-act="map">Back to the map</button>`}
-    <button class="btn" data-act="close">Keep building</button></div>
+    <button class="btn" data-act="close">Stay here</button></div>
     ${next ? '' : '<p class="tip">That is all of Version 1. Chapter 3 (Simplify) comes next.</p>'}`);
 }
 
